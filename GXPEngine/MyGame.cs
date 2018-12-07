@@ -9,7 +9,7 @@ public class MyGame : Game
 
 	void Update()
 	{
-        Console.WriteLine("hello");
+        Console.WriteLine("jkhjk");
 		// Empty
 	}
 

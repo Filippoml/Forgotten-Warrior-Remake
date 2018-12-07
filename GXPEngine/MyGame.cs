@@ -4,13 +4,19 @@ using GXPEngine.Classes;
 
 public class MyGame : Game
 {
-	public MyGame() : base(800, 600, false)		// Create a window that's 800x600 and NOT fullscreen
+	public MyGame() : base(800, 600, false,false,pPixelArt:true)		// Create a window that's 800x600 and NOT fullscreen
 	{
-	}
+        Sprite background = new Sprite("Data/map.png");
+        AddChild(background);
+
+        Player player = new Player();
+        AddChild(player);
+        //targetFps = 5;
+    }
 
 	void Update()
 	{
-        Player player = new Player();
+
 		// Empty
 	}
 

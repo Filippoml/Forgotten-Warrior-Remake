@@ -34,6 +34,9 @@
   <ItemGroup>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Xml" />
+    <Reference Include="TiledSharp, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\TiledSharp.1.0.0\lib\TiledSharp.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Player.cs" />
@@ -72,6 +75,6 @@
     <Compile Include="GXPEngine\AddOns\EasyDraw.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="Data\Player.png" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

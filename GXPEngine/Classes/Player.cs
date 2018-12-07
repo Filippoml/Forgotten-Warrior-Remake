@@ -2,14 +2,38 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 
 namespace GXPEngine.Classes
 {
-    class Player : Sprite
+    class Player : AnimationSprite
     {
-        public Player() : base("Data/Player.png")
+        int counter=0;
+        int frameRate = 13;
+
+        
+        public Player() : base("Data/Player.png", 8, 7)
         {
-            
+            SetFrame(9);
+            scale=3;
+        }
+
+        void Update()
+        { 
+            counter++;
+            if (counter == 60/frameRate)
+            {
+
+
+
+                //_currentFrame = 100;/*
+                NextFrame();
+                if (currentFrame > 15)
+                {
+                    currentFrame = 9;
+                }
+                counter = 0;
+            }
         }
     }
 }

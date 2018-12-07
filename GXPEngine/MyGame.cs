@@ -9,6 +9,7 @@ public class MyGame : Game
 
 	void Update()
 	{
+        Console.WriteLine("hello");
 		// Empty
 	}
 

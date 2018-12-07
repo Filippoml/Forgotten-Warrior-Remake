@@ -36,6 +36,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Player.cs" />
     <Compile Include="MyGame.cs" />
     <Compile Include="GXPEngine\Canvas.cs" />
     <Compile Include="GXPEngine\Game.cs" />
@@ -71,7 +72,6 @@
     <Compile Include="GXPEngine\AddOns\EasyDraw.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="GXPEngine\" />
-    <Folder Include="GXPEngine\AddOns\" />
+    <Content Include="Data\Player.png" />
   </ItemGroup>
 </Project>

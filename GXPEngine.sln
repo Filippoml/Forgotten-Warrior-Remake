@@ -1,7 +1,8 @@
 ﻿
-Microsoft Visual Studio Solution File, Format Version 11.00
-# Visual Studio 2010
-# SharpDevelop 4.3
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 15
+VisualStudioVersion = 15.0.28307.136
+MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GXPEngine", "GXPEngine\GXPEngine.csproj", "{B5126D4C-7FE0-4552-BC8C-E68D529C22B2}"
 EndProject
 Global
@@ -14,6 +15,12 @@ Global
 		{B5126D4C-7FE0-4552-BC8C-E68D529C22B2}.Debug|x86.Build.0 = Debug|x86
 		{B5126D4C-7FE0-4552-BC8C-E68D529C22B2}.Release|x86.ActiveCfg = Release|x86
 		{B5126D4C-7FE0-4552-BC8C-E68D529C22B2}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {E3B7B006-180C-4688-87A0-44F7C9A3E1D8}
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItem = GXPEngine\GXPEngine.csproj

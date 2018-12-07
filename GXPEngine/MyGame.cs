@@ -1,5 +1,6 @@
 using System;									// System contains a lot of default C# libraries 
-using GXPEngine;								// GXPEngine contains the engine
+using GXPEngine;                                // GXPEngine contains the engine
+using GXPEngine.Classes;
 
 public class MyGame : Game
 {
@@ -9,7 +10,7 @@ public class MyGame : Game
 
 	void Update()
 	{
-        Console.WriteLine("jkhjk");
+        Player player = new Player();
 		// Empty
 	}
 

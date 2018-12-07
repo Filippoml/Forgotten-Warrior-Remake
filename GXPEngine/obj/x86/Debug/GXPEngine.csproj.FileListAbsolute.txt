@@ -1,0 +1,6 @@
+D:\Google Drive\Saxion\Quartile 2\Game Programming\gxpengine\GXPEngine\bin\Debug\GXPEngine.exe
+D:\Google Drive\Saxion\Quartile 2\Game Programming\gxpengine\GXPEngine\bin\Debug\GXPEngine.pdb
+D:\Google Drive\Saxion\Quartile 2\Game Programming\gxpengine\GXPEngine\obj\x86\Debug\GXPEngine.csprojAssemblyReference.cache
+D:\Google Drive\Saxion\Quartile 2\Game Programming\gxpengine\GXPEngine\obj\x86\Debug\GXPEngine.csproj.CoreCompileInputs.cache
+D:\Google Drive\Saxion\Quartile 2\Game Programming\gxpengine\GXPEngine\obj\x86\Debug\GXPEngine.exe
+D:\Google Drive\Saxion\Quartile 2\Game Programming\gxpengine\GXPEngine\obj\x86\Debug\GXPEngine.pdb

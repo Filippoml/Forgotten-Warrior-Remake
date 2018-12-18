@@ -12,10 +12,10 @@ namespace GXPEngine.Classes
         int frameRate = 13;
 
         
-        public Player() : base("Data/Player.png", 8, 7)
+        public Player() : base("Data/player.png", 8, 7)
         {
             SetFrame(9);
-            scale=3;
+
         }
 
         void Update()

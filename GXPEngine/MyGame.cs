@@ -13,16 +13,26 @@ public class MyGame : Game
     /// Defines the mapPath
     /// </summary>
     AnimationSprite sprite;
+    private static AnimationSprite[] objects;
+    private Player _player;
+    int num_objects = 0;
 
+    public static AnimationSprite[] Objects
+    {
+        get { return objects; }
+        set { objects = value; }
+
+    }
     /// <summary>
     /// Initializes a new instance of the <see cref="MyGame"/> class.
     /// </summary>
     public MyGame() : base(800, 600, false, false, pPixelArt: true)		// Create a window that's 800x600 and NOT fullscreen
     {
+      
+        objects = new AnimationSprite[100];
 
-        scale = 0.8f;
-        Player player = new Player();
-        AddChild(player);
+        _player = new Player();
+        AddChild(_player);
 
         Map level = MapParser.ReadMap("level.tmx");
 
@@ -53,15 +63,17 @@ public class MyGame : Game
 
                 int x = j % columns;
                 int y = j / columns;
-                Console.WriteLine(x + "---" + y);
                 sprite = new AnimationSprite(texture.bitmap, level.TileSets[0].Columns, level.TileSets[0].Rows);
                 AddChild(sprite);
+
+                objects[num_objects] = sprite;
+                num_objects++;
                 sprite.x = x * 70;
                 sprite.y = y * 70;
                 sprite.currentFrame = tiles[j] - 1;
 
             }
-
+            
         }
     }
 
@@ -70,7 +82,17 @@ public class MyGame : Game
     /// </summary>
     internal void Update()
     {
-     //   sprite.NextFrame();
+        for(int i=0; i<objects.Length; i++)
+        {
+            if (objects[i] != null)
+            {
+                if (_player.HitTest(objects[i]))
+                {
+                    i = objects.Length;
+                    //Console.WriteLine("test");
+                }
+            }
+        }
     }
 
     /// <summary>

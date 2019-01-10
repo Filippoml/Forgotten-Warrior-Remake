@@ -51,6 +51,7 @@
   <ItemGroup>
     <Compile Include="Classes\Player.cs" />
     <Compile Include="Classes\ElapsedGameTime.cs" />
+    <Compile Include="Classes\Weapon.cs" />
     <Compile Include="MyGame.cs" />
     <Compile Include="GXPEngine\Canvas.cs" />
     <Compile Include="GXPEngine\Game.cs" />

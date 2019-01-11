@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Drawing;
 
 namespace GXPEngine.Classes
 {
@@ -35,7 +36,9 @@ namespace GXPEngine.Classes
         /// <summary>
         /// Defines the _moving, _colliding, _jumping
         /// </summary>
-        private bool _moving = false, _colliding = false, _jumping = false;
+        private bool _colliding = false, _canClimb = false, _isClimbingDown;
+
+        private float _stairs_x;
 
         private Weapon _currentWeapon;
         /// <summary>
@@ -57,7 +60,8 @@ namespace GXPEngine.Classes
             JUMPING,
 
             FALLING, 
-            ATTACKING
+            ATTACKING,
+            CLIMBING
         }
 
         /// <summary>
@@ -75,12 +79,15 @@ namespace GXPEngine.Classes
             currentFrame = 0;
             test = new ElapsedGameTime();
             x = 100;
-            y = 100;
+            y = 1000;
 
             _currentWeapon = new Weapon();
             AddChild(_currentWeapon);
-        }
 
+            
+            
+        }
+        int e = 0;
         /// <summary>
         /// The SetState
         /// </summary>
@@ -95,22 +102,23 @@ namespace GXPEngine.Classes
         /// </summary>
         internal void Update()
         {
-            float old_x = x;
-            float old_y = y;
+
+            Console.WriteLine(x);
 
 
-
-            if (_currentState == State.MOVING)
+            if (_currentState == State.MOVING && _currentState != State.CLIMBING)
             {
-                SetState(State.IDLE);
+
+                _currentState = State.IDLE;
             }
 
             counter++;
 
+            _isClimbingDown = false;
 
             //if (!_colliding)
             //{
-            if (Input.GetKey(Key.A))
+            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING)
             {
                 x = x - speed;
 
@@ -126,12 +134,14 @@ namespace GXPEngine.Classes
 
 
 
-                if (x % game.width <= 3)
+                if (x % game.width <= 2)
                 {
                     game.Translate(800, 0);
                 }
+                
             }
-            if (Input.GetKey(Key.D))
+   
+            if (Input.GetKey(Key.D) && _currentState != State.CLIMBING)
             {
                 x = x + speed;
 
@@ -142,40 +152,82 @@ namespace GXPEngine.Classes
 
                 if (_currentState == State.IDLE)
                 {
-                    SetState(State.MOVING);
+                    _currentState = State.MOVING;
                 }
-                Console.WriteLine(x % game.width);
                 
-                if(x % game.width >= 799)
+                if(x % game.width >= 797)
                 {
                     game.Translate(-800, 0);
                 }
-
             }
-            if (Input.GetKey(Key.W))
+
+            if (Input.GetKey(Key.W) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
+                if (_canClimb && e < 94)
+                {
+                    _currentState = State.CLIMBING;
+                    y -= 1.5f;
+                    e++;
+                   
+                }
 
+                if(e > 93)
+                {
+                    _currentState = State.IDLE;
+                }
+                /*
+                if (_currentState == State.CLIMBING)
+                {
+                    if(_canClimb)
+                    {
+                        _currentState = State.CLIMBING;
+                        y -= 1.5f;
+
+                    }
+                }
+                else
+                {
+                    if (_canClimb)
+                    {
+                        _currentState = State.CLIMBING;
+                        y -= 1.5f;
+               
+                    }
+                }*/
             }
-            if (Input.GetKey(Key.S))
+            else
             {
-
-
+                //_currentState = State.IDLE;
             }
-            if (Input.GetKey(Key.SPACE) && _colliding)
+            if (Input.GetKey(Key.S) && _currentState != State.FALLING && _currentState != State.JUMPING)
+            {
+               
+                    if (_canClimb && e > 0)
+                    {
+                    e--;
+                    _currentState = State.CLIMBING;
+                        y += 1.5f;
+                     
+                    }
+                else
+                {
+                    _currentState = State.IDLE;
+                }
+                
+            }
+            if (Input.GetKey(Key.SPACE) && _colliding && _currentState != State.CLIMBING)
             {
 
                 _currentState = State.JUMPING;
                 _velocity = 5;
 
             }
-            if(Input.GetMouseButtonDown(0) && (_currentState == State.IDLE || _currentState == State.MOVING) && _currentState != State.ATTACKING)
+            if(Input.GetMouseButtonDown(0) && (_currentState == State.IDLE || _currentState == State.MOVING) && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
             {
                 _currentState = State.ATTACKING;
-
             }
 
-            //}
-
+            
             if (counter == (60 / frameRate))
             {
 
@@ -213,6 +265,18 @@ namespace GXPEngine.Classes
                         _currentWeapon.SetVisible(true, _mirrorX);
                         _currentState = State.IDLE;
                         break;
+                    case State.CLIMBING:
+                        if (currentFrame > 10 || currentFrame < 10)
+                        {
+                            currentFrame = 10;
+                        }
+                        else
+                        {
+                            NextFrame();
+                        }
+                        x = _stairs_x;
+                        break;
+                    
                 }
 
 
@@ -220,39 +284,58 @@ namespace GXPEngine.Classes
 
 
             }
-
+            
             _colliding = false;
 
-
+            _canClimb = false;
+            
             for (int i = 0; i < MyGame.Objects.Length; i++)
             {
                 if (MyGame.Objects[i] != null)
                 {
                     if (this.HitTest(MyGame.Objects[i]))
                     {
+                        if ((MyGame.Id_Tiles[i] == 7 && (e < 94)) || (MyGame.Id_Tiles[i] == 7 && _currentState == State.IDLE))
+                        {
+                            _stairs_x = MyGame.Objects[i].x - 12;
 
+                            _canClimb = true;
+
+
+                        }
+
+
+                        //Check if player is colliding with ground tiles
                         if (MyGame.Id_Tiles[i] >= 1 && MyGame.Id_Tiles[i] <= 3)
                         {
                             _colliding = true;
                         }
-                        else
+
+                        
+                        
+                        
+                        if(MyGame.Id_Tiles[i] == 5)
                         {
                             _colliding = false;
                         }
-
-
-
-                    }
-                    else
-                    {
                         
+
+
+
+                        /*
+                        if(_canClimb && !_colliding)
+                        {
+                            _currentState = State.CLIMBING;
+                        }
+                        */
+
+    
                     }
                 }
             }
 
 
-
-
+            
 
             if (_currentState == State.JUMPING)
             {
@@ -265,25 +348,37 @@ namespace GXPEngine.Classes
                 _currentState = State.IDLE;
             }
 
-            if (_colliding && _currentState != State.ATTACKING)
+            if (_colliding && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
             {
                 _currentState = State.IDLE;
+
             }
+
             
-            if(!_colliding)
+
+            //Gravity
+            if (!_colliding)
             {
-                if (_currentState != State.JUMPING)
+                if (_currentState != State.JUMPING && _currentState != State.CLIMBING)
                 {
                     _velocity += 0.2f;
                     y += _velocity;
                     _currentState = State.FALLING;
+
+                    
+
+                    //Check if fallen on lower floor or jumped
+                    if (_velocity > 5)
+                    {
+                        e = 0;
+                    }
 
                 }
             }
 
 
 
-            if (y > 500)
+            if (y > 1100)
             {
                 x = 100;
                 y = 100;

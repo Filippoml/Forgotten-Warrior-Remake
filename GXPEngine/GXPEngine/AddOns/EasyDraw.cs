@@ -334,6 +334,7 @@ namespace GXPEngine
                 y -= theight / 2;
             }
             graphics.DrawString(text, font, brush, x, y); //left+BoundaryPadding/2,top+BoundaryPadding/2);
+           
         }
 
         /// <summary>

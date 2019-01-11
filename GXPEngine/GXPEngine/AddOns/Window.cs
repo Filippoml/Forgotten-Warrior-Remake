@@ -1,5 +1,6 @@
 namespace GXPEngine
 {
+    using System.Drawing;
     using GXPEngine.Core;
     using GXPEngine.OpenGL;
 
@@ -160,6 +161,7 @@ namespace GXPEngine
                 current.Render(glContext);
                 main.SetViewport(0, 0, Game.main.width, Game.main.height);
                 main.RenderRange = new GXPEngine.Core.Rectangle(0, 0, main.width, main.height);
+                
             }
 
             for (int i = 0; i < pushes; i++)

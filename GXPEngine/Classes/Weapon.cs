@@ -10,10 +10,10 @@ namespace GXPEngine.Classes
     {
         public Weapon () : base("Data/weapons.png",4,1)
         {
-
             y = 15;
             visible = false;
             currentFrame = 0;
+
         }
 
         public void SetVisible(bool value, bool mirrored)

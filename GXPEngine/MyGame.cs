@@ -122,9 +122,16 @@ public class MyGame : Game
         
 
         _player = new Player();
+
+        Swordman swordman = new Swordman(150, 900);
+
+        AddChild(swordman);
         AddChild(_player);
 
-        game.Translate(0, -800);
+
+        game.Translate(-50, -600);
+
+
     }
 
     /// <summary>

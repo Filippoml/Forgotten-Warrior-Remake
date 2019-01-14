@@ -11,17 +11,17 @@ namespace GXPEngine.Classes
         /// <summary>
         /// Defines the counter
         /// </summary>
-        internal int counter = 0;
+        private int counter = 0;
 
         /// <summary>
         /// Defines the frameRate
         /// </summary>
-        internal int frameRate = 12;
+        private int frameRate = 12;
 
         /// <summary>
         /// Defines the speed
         /// </summary>
-        internal int speed = 3;
+        private int speed = 3;
 
         /// <summary>
         /// Defines the _velocity
@@ -29,14 +29,9 @@ namespace GXPEngine.Classes
         private float _velocity = 0;
 
         /// <summary>
-        /// Defines the test
-        /// </summary>
-        internal ElapsedGameTime test;
-
-        /// <summary>
         /// Defines the _moving, _colliding, _jumping
         /// </summary>
-        private bool _colliding = false, _canClimb = false, _isClimbingDown;
+        private bool _colliding = false, _canClimb = false;
 
         private float _stairs_x;
 
@@ -77,7 +72,7 @@ namespace GXPEngine.Classes
             SetFrame(9);
             SetScaleXY(1.2f);
             currentFrame = 0;
-            test = new ElapsedGameTime();
+            
             x = 100;
             y = 1000;
 
@@ -100,10 +95,8 @@ namespace GXPEngine.Classes
         /// <summary>
         /// The Update
         /// </summary>
-        internal void Update()
+        void Update()
         {
-
-            Console.WriteLine(x);
 
 
             if (_currentState == State.MOVING && _currentState != State.CLIMBING)
@@ -113,11 +106,8 @@ namespace GXPEngine.Classes
             }
 
             counter++;
+            
 
-            _isClimbingDown = false;
-
-            //if (!_colliding)
-            //{
             if (Input.GetKey(Key.A) && _currentState != State.CLIMBING)
             {
                 x = x - speed;
@@ -175,30 +165,9 @@ namespace GXPEngine.Classes
                 {
                     _currentState = State.IDLE;
                 }
-                /*
-                if (_currentState == State.CLIMBING)
-                {
-                    if(_canClimb)
-                    {
-                        _currentState = State.CLIMBING;
-                        y -= 1.5f;
+                
+            }
 
-                    }
-                }
-                else
-                {
-                    if (_canClimb)
-                    {
-                        _currentState = State.CLIMBING;
-                        y -= 1.5f;
-               
-                    }
-                }*/
-            }
-            else
-            {
-                //_currentState = State.IDLE;
-            }
             if (Input.GetKey(Key.S) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
                
@@ -235,15 +204,6 @@ namespace GXPEngine.Classes
                 switch (_currentState)
                 {
                     case State.IDLE:
-                        if (currentFrame > 0)
-                        {
-                            currentFrame = 0;
-                        }
-                        else
-                        {
-                            NextFrame();
-                        }
-                        break;
                     case State.MOVING:
                         if (currentFrame > 0)
                         {
@@ -254,6 +214,7 @@ namespace GXPEngine.Classes
                             NextFrame();
                         }
                         break;
+                    
                     case State.JUMPING:
                             currentFrame = 6;
                         break;

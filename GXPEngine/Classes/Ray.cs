@@ -7,9 +7,9 @@ using GXPEngine.GXPEngine;
 
 namespace GXPEngine.Classes
 {
-    class Ray : Sprite
+    public class Ray : Sprite
     {
-        public Ray() : base("Data/HitBox.png")
+        public Ray(String filename) : base(filename)
         {
 
         }

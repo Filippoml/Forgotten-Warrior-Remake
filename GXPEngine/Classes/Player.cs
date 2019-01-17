@@ -84,7 +84,7 @@ namespace GXPEngine.Classes
             _currentWeapon = new Weapon();
             AddChild(_currentWeapon);
 
-            _colliderBox = new Ray();
+            _colliderBox = new Ray("Data/HitBox.png");
             _colliderBox.SetOrigin(-12, 0);
             AddChild(_colliderBox);
 
@@ -430,6 +430,11 @@ namespace GXPEngine.Classes
             x = x + moveX;
             y = y + moveY;
            
+        }
+
+        public Ray getCollider()
+        {
+            return _colliderBox;
         }
         
     }

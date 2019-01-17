@@ -9,7 +9,6 @@ namespace GXPEngine.GXPEngine
     class Tile : AnimationSprite
     {
         private int _id;
-        private AnimationSprite _animationSprite;
 
         public Tile(int id, string filename, int cols, int rows) : base (filename, cols, rows)
         {

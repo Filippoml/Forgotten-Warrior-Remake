@@ -8,7 +8,7 @@ namespace GXPEngine.Classes
 {
     class Weapon : AnimationSprite
     {
-        public Weapon () : base("Data/weapons.png",4,1)
+        public Weapon () : base("Data/weapons.png",5,1)
         {
             y = 15;
             visible = false;

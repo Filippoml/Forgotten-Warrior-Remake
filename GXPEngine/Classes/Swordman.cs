@@ -23,7 +23,7 @@ namespace GXPEngine.Classes
         private System.Timers.Timer _timer;
         private Status _status;
 
-        private Ray _colliderBox;
+        private Ray _colliderBox, _colliderBox2;
 
         private enum State
         {
@@ -77,8 +77,11 @@ namespace GXPEngine.Classes
             _screenSection = Convert.ToInt32(Math.Floor(this.x / 800));
 
 
-            _colliderBox = new Ray();
+            _colliderBox = new Ray("Data/HitBox.png");
+            _colliderBox2 = new Ray("Data/HitBox2.png");
+            _colliderBox2.SetOrigin(-20, -20);
             AddChild(_colliderBox);
+            AddChild(_colliderBox2);
         }
 
         private void OnTimedEvent(object sender, ElapsedEventArgs e)
@@ -112,7 +115,8 @@ namespace GXPEngine.Classes
                     //Check if player is colliding with ground tiles
                     if (_tile.GetId() >= 1 && _tile.GetId() <= 3)
                         {
-                            _colliding = true;
+                        y = _tile.y - this.height + 2;
+                        _colliding = true;
                         }
                         if(_screenSection != Convert.ToInt32(Math.Floor(this.x / 800))){
                             _movingRight = !_movingRight;
@@ -120,31 +124,49 @@ namespace GXPEngine.Classes
 
                         if(_tile.GetId() == 1 || _tile.GetId() == 3 || _screenSection != Convert.ToInt32(Math.Floor(this.x / 800)))
                         {
-                            if (_canFlip)
+                            
+                        if (_canFlip)
                             {
                                 _canFlip = false;
                                 _movingRight = !_movingRight;
                             }
                         }
-                   
+                    if (_currentState == State.ATTACKING)
+                    {
+                        _currentState = State.IDLE;
+                    }
+
+
                 }
                 else if(collisions[i] is Player)
                 {
-                    Console.WriteLine("colliding");
+                    _currentState = State.ATTACKING;
+                }
+     
+            }
+
+            collisions = _colliderBox2.GetCollisions();
+            for (int i = 0; i < collisions.Length; i++)
+            {
+                if (collisions[i] is Ray)
+                {
+                    if (collisions[i] == ((MyGame)game).Player.getCollider())
+                    {
+                        _currentState = State.ATTACKING;
+                    }
                 }
             }
 
 
-
-            if (_currentState != State.SLEEPING && Math.Floor(this.x / 800) == Math.Floor(((MyGame)game).Player.x / 800) && Math.Abs(this.y - ((MyGame)game).Player.y) < 100)
+                if (_currentState != State.SLEEPING && Math.Floor(this.x / 800) == Math.Floor(((MyGame)game).Player.x / 800) && Math.Abs(this.y - ((MyGame)game).Player.y) < 100)
             {
                 //Detect player
-                if (((MyGame)game).Player.x > this.x && !_mirrorX)
+                if (((MyGame)game).Player.x > this.x && !_mirrorX && _currentState != State.ATTACKING)
                 {
                     _playerRight = true;
                     _currentState = State.FOLLOWING;
                 }
-                else if (((MyGame)game).Player.x < this.x && _mirrorX)
+                else if (((MyGame)game).Player.x < this.x && _mirrorX && _currentState != State.ATTACKING)
                 {
                     _playerRight = false;
                     _currentState = State.FOLLOWING;
@@ -202,7 +224,7 @@ namespace GXPEngine.Classes
                             _canFlip = true;
                             if (_direction == 1)
                             {
-                                _movingRight = true;
+                                _movingRight = false;
                             }
                             else
                             {
@@ -220,8 +242,8 @@ namespace GXPEngine.Classes
 
                 }
             }
- 
 
+            
             if (_currentState == State.MOVING && _currentState != State.FOLLOWING)
             {
                 if (_movingRight)
@@ -252,6 +274,7 @@ namespace GXPEngine.Classes
                 {
                     if (_mirrorX)
                     {
+                        _colliderBox2.SetOrigin(-20, -20);
                         Mirror(false, false);
                     }
                 }
@@ -259,17 +282,21 @@ namespace GXPEngine.Classes
                 {
                     if (!_mirrorX)
                     {
+                        _colliderBox2.SetOrigin(20, -20);
                         Mirror(true, false);
                     }
                 }
-
-                if (currentFrame > 0)
+                if (_currentState != State.ATTACKING)
                 {
-                    currentFrame = 0;
-                }
-                else
-                {
-                    NextFrame();
+                    _frameRate = 12;
+                    if (currentFrame > 0)
+                    {
+                        currentFrame = 0;
+                    }
+                    else
+                    {
+                        NextFrame();
+                    }
                 }
 
                 switch (_currentState)
@@ -282,7 +309,19 @@ namespace GXPEngine.Classes
                         _status.SetVisible(true);
                         _status.SetFrame(2);
                         break;
+                    case State.ATTACKING:
+                        Console.WriteLine(currentFrame);
+                        _frameRate = 8;
+                        if (currentFrame == 2)
+                        {
+                            currentFrame = 1;
+                        }
+                        else
+                        {
+                            currentFrame = 2;
+                        }
 
+                        break;
                 }
 
                 _counter = 0;

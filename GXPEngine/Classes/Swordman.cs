@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Timers;
+using GXPEngine.GXPEngine;
 
 namespace GXPEngine.Classes
 {
     /// <summary>
     /// Defines the <see cref="Swordman" />
     /// </summary>
-    internal class Swordman : AnimationSprite
+    internal class Swordman : Enemy
     {
         /// <summary>
         /// Defines the _colliding
@@ -15,14 +16,16 @@ namespace GXPEngine.Classes
 
         private float _velocity = 0, _speed = 2;
 
-        private int _counter = 0, _frameRate = 12;
+        private int _counter = 0, _frameRate = 12, _screenSection;
 
-        private bool _movingRight = false, _canFlip = true;
+        private bool _movingRight = false, _playerRight = false, _canFlip = true;
 
         private System.Timers.Timer _timer;
         private Status _status;
 
-        public enum State
+        private Ray _colliderBox;
+
+        private enum State
         {
             /// <summary>
             /// Defines the IDLE
@@ -40,7 +43,8 @@ namespace GXPEngine.Classes
             FALLING,
             ATTACKING,
             CLIMBING,
-            SLEEPING
+            SLEEPING,
+            FOLLOWING
         }
 
         /// <summary>
@@ -70,6 +74,11 @@ namespace GXPEngine.Classes
             _status = new Status();
             AddChild(_status);
 
+            _screenSection = Convert.ToInt32(Math.Floor(this.x / 800));
+
+
+            _colliderBox = new Ray();
+            AddChild(_colliderBox);
         }
 
         private void OnTimedEvent(object sender, ElapsedEventArgs e)
@@ -91,21 +100,25 @@ namespace GXPEngine.Classes
             _colliding = false;
 
 
-            for (int i = 0; i < MyGame.Objects.Length; i++)
+            // TODO: use this instead:
+            GameObject[] collisions = _colliderBox.GetCollisions();
+            for (int i = 0; i < collisions.Length; i++)
             {
-                if (MyGame.Objects[i] != null)
+
+                if (collisions[i] is Tile)
                 {
-                    if (this.HitTest(MyGame.Objects[i]))
-                    {
 
-
-                        //Check if player is colliding with ground tiles
-                        if (MyGame.Id_Tiles[i] >= 1 && MyGame.Id_Tiles[i] <= 3)
+                    Tile _tile = collisions[i] as Tile;
+                    //Check if player is colliding with ground tiles
+                    if (_tile.GetId() >= 1 && _tile.GetId() <= 3)
                         {
                             _colliding = true;
                         }
+                        if(_screenSection != Convert.ToInt32(Math.Floor(this.x / 800))){
+                            _movingRight = !_movingRight;
+                        }
 
-                        if(MyGame.Id_Tiles[i] == 1 || MyGame.Id_Tiles[i] == 3)
+                        if(_tile.GetId() == 1 || _tile.GetId() == 3 || _screenSection != Convert.ToInt32(Math.Floor(this.x / 800)))
                         {
                             if (_canFlip)
                             {
@@ -113,14 +126,54 @@ namespace GXPEngine.Classes
                                 _movingRight = !_movingRight;
                             }
                         }
-                    }
+                   
+                }
+                else if(collisions[i] is Player)
+                {
+                    Console.WriteLine("colliding");
                 }
             }
 
-            if (test) {
+
+
+            if (_currentState != State.SLEEPING && Math.Floor(this.x / 800) == Math.Floor(((MyGame)game).Player.x / 800) && Math.Abs(this.y - ((MyGame)game).Player.y) < 100)
+            {
+                //Detect player
+                if (((MyGame)game).Player.x > this.x && !_mirrorX)
+                {
+                    _playerRight = true;
+                    _currentState = State.FOLLOWING;
+                }
+                else if (((MyGame)game).Player.x < this.x && _mirrorX)
+                {
+                    _playerRight = false;
+                    _currentState = State.FOLLOWING;
+                }
+                else
+                {
+                    if (_currentState == State.FOLLOWING)
+                    {
+                        _currentState = State.IDLE;
+                    }
+                }
+            }
+            else
+            {
+       
+                if(_currentState == State.FOLLOWING)
+                {
+                    _currentState = State.IDLE;
+                }
+                
+ 
+            }
+
+            
+            //I NEED TO EDIT THE NAME OF THE VARIABLE
+            if (test && _currentState  != State.FOLLOWING) {
                 test = false;
                 Random rnd = new Random();
-                _timer.Interval = rnd.Next(1000, 2500);
+                _timer.Interval = rnd.Next(250, 1250);
                 if (_currentState != State.ATTACKING && _colliding)
                 {
                     
@@ -167,9 +220,9 @@ namespace GXPEngine.Classes
 
                 }
             }
-            Console.WriteLine(_movingRight);
+ 
 
-            if (_currentState == State.MOVING)
+            if (_currentState == State.MOVING && _currentState != State.FOLLOWING)
             {
                 if (_movingRight)
                 {
@@ -180,7 +233,17 @@ namespace GXPEngine.Classes
                     x -= _speed;
                 }
             }
-
+            else if(_currentState == State.FOLLOWING)
+            {
+                if (_playerRight)
+                {
+                    x += _speed;
+                }
+                else
+                {
+                    x -= _speed;
+                }
+            }
 
 
             if (_counter == (60 / _frameRate))
@@ -200,31 +263,24 @@ namespace GXPEngine.Classes
                     }
                 }
 
+                if (currentFrame > 0)
+                {
+                    currentFrame = 0;
+                }
+                else
+                {
+                    NextFrame();
+                }
+
                 switch (_currentState)
                 {
-                    case State.IDLE:
-                    case State.MOVING:
-                    
-                        if (currentFrame > 0)
-                        {
-                            currentFrame = 0;
-                        }
-                        else
-                        {
-                            NextFrame();
-                        }
-
-                        break;
+                   
                     case State.SLEEPING:
                         _status.floating();
-                        if (currentFrame > 0)
-                        {
-                            currentFrame = 0;
-                        }
-                        else
-                        {
-                            NextFrame();
-                        }
+                        break;
+                    case State.FOLLOWING:
+                        _status.SetVisible(true);
+                        _status.SetFrame(2);
                         break;
 
                 }
@@ -240,6 +296,7 @@ namespace GXPEngine.Classes
                 _velocity += 0.2f;
                 y += _velocity;
             }
+            
         }
     }
 }

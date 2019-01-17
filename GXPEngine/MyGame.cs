@@ -3,6 +3,7 @@ using System.Drawing;
 using GXPEngine;                                // GXPEngine contains the engine
 using GXPEngine.Classes;
 using GXPEngine.Core;
+using GXPEngine.GXPEngine;
 using TiledMapParser;
 
 /// <summary>
@@ -15,20 +16,29 @@ public class MyGame : Game
     /// </summary>
     internal AnimationSprite sprite;
 
+    // TODO: no public static! (certainly no static)
+
     /// <summary>
     /// Defines the objects
     /// </summary>
     private static AnimationSprite[] objects;
+
+    private Tile[] Tiles; 
 
     /// <summary>
     /// Defines the id_tiles
     /// </summary>
     private static int[] id_tiles;
 
-    /// <summary>
-    /// Defines the _player
-    /// </summary>
-    private Player _player;
+    public Player Player
+    {
+        get
+        {
+            return player;
+        }
+    }
+    Player player;
+
 
     /// <summary>
     /// Defines the num_objects
@@ -61,6 +71,7 @@ public class MyGame : Game
         
         objects = new AnimationSprite[1000];
         id_tiles = new int[1000];
+        Tiles = new Tile[1000];
 
         //Background creation
         Bitmap Bmp = new Bitmap(width, height);
@@ -85,7 +96,7 @@ public class MyGame : Game
             Data leveldata = _currentLayer.Data;
   
 
-            Texture2D texture = new Texture2D(level.TileSets[0].Image.FileName);
+         
 
 
             String levelData = _currentLayer.Data.innerXML.ToString();
@@ -95,6 +106,7 @@ public class MyGame : Game
 
             int columns = level.Layers[0].Width;
             int rows = level.Layers[0].Height;
+            
             for (int j = 0; j < tiles.Length; j++)
             {
 
@@ -103,33 +115,36 @@ public class MyGame : Game
 
                     int x = j % columns;
                     int y = j / columns;
-                    sprite = new AnimationSprite(texture.bitmap, level.TileSets[0].Columns, level.TileSets[0].Rows);
-                    AddChild(sprite);
+                    //sprite = new AnimationSprite(texture.bitmap, level.TileSets[0].Columns, level.TileSets[0].Rows);
+                    //sprite.currentFrame = tiles[j] - 1;
+
+                    Tiles[num_objects] = new Tile(tiles[j], level.TileSets[0].Image.FileName, level.TileSets[0].Columns, level.TileSets[0].Rows);
+                    Tiles[num_objects].currentFrame = tiles[j] - 1;
 
                     objects[num_objects] = sprite;
-
                     id_tiles[num_objects] = tiles[j];
 
 
+                    
+                    Tiles[num_objects].x = x * 30;
+                    Tiles[num_objects].y = y * 30;
+                    AddChild(Tiles[num_objects]);
                     num_objects++;
-                    sprite.x = x * 30;
-                    sprite.y = y * 30;
-                    sprite.currentFrame = tiles[j] - 1;
                 }
 
             }
         }
-        
 
-        _player = new Player();
 
-        Swordman swordman = new Swordman(150, 900);
+        player = new Player();
+
+        Swordman swordman = new Swordman(1000, 1000);
 
         AddChild(swordman);
-        AddChild(_player);
+        AddChild(player);
 
 
-        game.Translate(-50, -600);
+        game.Translate(0, -600);
 
 
     }
@@ -143,14 +158,14 @@ public class MyGame : Game
         {
             if (objects[i] != null)
             {
-                if (_player.HitTest(objects[i]))
+                if (player.HitTest(objects[i]))
                 {
                     i = objects.Length;
                     //Console.WriteLine("test");
                 }
             }
         }
-
+        // TODO: put scrolling code here (or later in level)
 
     }
 

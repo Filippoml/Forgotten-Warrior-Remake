@@ -1,12 +1,13 @@
 ﻿using System;
 using System.Drawing;
+using GXPEngine.GXPEngine;
 
 namespace GXPEngine.Classes
 {
     /// <summary>
     /// Defines the <see cref="Player" />
     /// </summary>
-    internal class Player : AnimationSprite
+    public class Player : AnimationSprite
     {
         /// <summary>
         /// Defines the counter
@@ -29,17 +30,21 @@ namespace GXPEngine.Classes
         private float _velocity = 0;
 
         /// <summary>
-        /// Defines the _moving, _colliding, _jumping
+        /// Defines the _moving, _grounding, _jumping
         /// </summary>
-        private bool _colliding = false, _canClimb = false;
+        private bool _grounding = false, _canClimb = false;
 
         private float _stairs_x;
 
+        private Ray _colliderBox;
+
         private Weapon _currentWeapon;
+
+        private bool _wasMovingRight = false, _wasMovingLeft = false;
         /// <summary>
         /// Defines the State
         /// </summary>
-        public enum State
+        private enum State
         {
             /// <summary>
             /// Defines the IDLE
@@ -79,18 +84,21 @@ namespace GXPEngine.Classes
             _currentWeapon = new Weapon();
             AddChild(_currentWeapon);
 
+            _colliderBox = new Ray();
+            _colliderBox.SetOrigin(-12, 0);
+            AddChild(_colliderBox);
+
             
             
         }
+        float old_y = 0;
         int e = 0;
+        bool up = false, down = false;
         /// <summary>
         /// The SetState
         /// </summary>
         /// <param name="state">The state<see cref="State"/></param>
-        public void SetState(State state)
-        {
-            _currentState = state;
-        }
+
 
         /// <summary>
         /// The Update
@@ -99,104 +107,24 @@ namespace GXPEngine.Classes
         {
 
 
+
+            // TODO: structure this code with a switch case based on state (easier to understand, though it probably introduces some code duplication)
             if (_currentState == State.MOVING && _currentState != State.CLIMBING)
             {
 
                 _currentState = State.IDLE;
             }
 
+            float old_x = x;
+    
+
+
             counter++;
-            
-
-            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING)
-            {
-                x = x - speed;
-
-                if (!_mirrorX)
-                {
-                    Mirror(true, false);
-                }
-
-                if (_currentState == State.IDLE)
-                {
-                    SetState(State.MOVING);
-                }
 
 
+            keyMovement();
 
-                if (x % game.width <= 2)
-                {
-                    game.Translate(800, 0);
-                }
-                
-            }
-   
-            if (Input.GetKey(Key.D) && _currentState != State.CLIMBING)
-            {
-                x = x + speed;
-
-                if (_mirrorX)
-                {
-                    Mirror(false, false);
-                }
-
-                if (_currentState == State.IDLE)
-                {
-                    _currentState = State.MOVING;
-                }
-                
-                if(x % game.width >= 797)
-                {
-                    game.Translate(-800, 0);
-                }
-            }
-
-            if (Input.GetKey(Key.W) && _currentState != State.FALLING && _currentState != State.JUMPING)
-            {
-                if (_canClimb && e < 94)
-                {
-                    _currentState = State.CLIMBING;
-                    y -= 1.5f;
-                    e++;
-                   
-                }
-
-                if(e > 93)
-                {
-                    _currentState = State.IDLE;
-                }
-                
-            }
-
-            if (Input.GetKey(Key.S) && _currentState != State.FALLING && _currentState != State.JUMPING)
-            {
-               
-                    if (_canClimb && e > 0)
-                    {
-                    e--;
-                    _currentState = State.CLIMBING;
-                        y += 1.5f;
-                     
-                    }
-                else
-                {
-                    _currentState = State.IDLE;
-                }
-                
-            }
-            if (Input.GetKey(Key.SPACE) && _colliding && _currentState != State.CLIMBING)
-            {
-
-                _currentState = State.JUMPING;
-                _velocity = 5;
-
-            }
-            if(Input.GetMouseButtonDown(0) && (_currentState == State.IDLE || _currentState == State.MOVING) && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
-            {
-                _currentState = State.ATTACKING;
-            }
-
-            
+            // TODO: put this in an Animate method:
             if (counter == (60 / frameRate))
             {
 
@@ -246,61 +174,68 @@ namespace GXPEngine.Classes
 
             }
             
-            _colliding = false;
+            _grounding = false;
 
             _canClimb = false;
+
+            // TODO: use this instead:
+            GameObject[] collisions = _colliderBox.GetCollisions();
             
-            for (int i = 0; i < MyGame.Objects.Length; i++)
+            for (int i = 0; i < collisions.Length; i++)
             {
-                if (MyGame.Objects[i] != null)
+  
+                if (collisions[i] is Tile)
                 {
-                    if (this.HitTest(MyGame.Objects[i]))
+                    Tile _tile = collisions[i] as Tile;
+                    if ((_tile.GetId() == 7 && (e < 94)) || (_tile.GetId() == 7 && _currentState == State.IDLE))
                     {
-                        if ((MyGame.Id_Tiles[i] == 7 && (e < 94)) || (MyGame.Id_Tiles[i] == 7 && _currentState == State.IDLE))
-                        {
-                            _stairs_x = MyGame.Objects[i].x - 12;
+                        _stairs_x = _tile.x - 12;
 
-                            _canClimb = true;
-
-
-                        }
-
-
-                        //Check if player is colliding with ground tiles
-                        if (MyGame.Id_Tiles[i] >= 1 && MyGame.Id_Tiles[i] <= 3)
-                        {
-                            _colliding = true;
-                        }
-
-                        
-                        
-                        
-                        if(MyGame.Id_Tiles[i] == 5)
-                        {
-                            _colliding = false;
-                        }
-                        
-
-
-
-                        /*
-                        if(_canClimb && !_colliding)
-                        {
-                            _currentState = State.CLIMBING;
-                        }
-                        */
-
-    
+                        _canClimb = true;
                     }
+
+         
+
+                    //Check if player is colliding with ground tiles
+                    if (_tile.GetId() >= 1 && _tile.GetId() <= 3 && _currentState != State.JUMPING && _currentState != State.CLIMBING)
+                    {
+                        _grounding = true;
+                        
+                        y = _tile.y - height + 2;
+                    }
+
+
+
+
+
+                    if (_tile.GetId() == 5 && _currentState != State.IDLE && _currentState != State.MOVING)
+                    {
+                       //_grounding = false;
+                    }
+
+
+
+                    /*
+                    if(_canClimb && !_grounding)
+                    {
+                        _currentState = State.CLIMBING;
+                    }
+                    */
+
                 }
-            }
-
-
+                    
+                }
             
+
+
+
+            if (_grounding) {
+                old_y = y;
+            }
 
             if (_currentState == State.JUMPING)
             {
-                _velocity -= 0.3f;
+                _velocity -= 0.2f;
                 y -= _velocity;
             }
 
@@ -309,7 +244,7 @@ namespace GXPEngine.Classes
                 _currentState = State.IDLE;
             }
 
-            if (_colliding && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
+            if (_grounding && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
             {
                 _currentState = State.IDLE;
 
@@ -318,14 +253,26 @@ namespace GXPEngine.Classes
             
 
             //Gravity
-            if (!_colliding)
+            if (!_grounding)
             {
                 if (_currentState != State.JUMPING && _currentState != State.CLIMBING)
                 {
-                    _velocity += 0.2f;
+
+                    if (_velocity < 8)
+                    {
+                        _velocity += 0.2f;
+                    }
                     y += _velocity;
                     _currentState = State.FALLING;
 
+                    if (_wasMovingLeft)
+                    {
+                        move(-speed, 0);
+                    }
+                    else if(_wasMovingRight)
+                    {
+                        move(speed, 0);
+                    }
                     
 
                     //Check if fallen on lower floor or jumped
@@ -346,5 +293,144 @@ namespace GXPEngine.Classes
                 _velocity = 0;
             }
         }
+
+        private void keyMovement()
+        {
+            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING && _currentState != State.FALLING)
+            {
+
+                _wasMovingLeft = true;
+                move(-speed, 0);
+                    if (_currentState == State.IDLE)
+                    {
+                        _currentState = State.MOVING;
+                    }
+
+                    if (!_mirrorX)
+                    {
+                        Mirror(true, false);
+                    }
+         
+                /*
+                x = x - speed;
+
+
+
+                if (_currentState == State.IDLE)
+                {
+                    _currentState = State.MOVING;
+                }
+
+                
+                 
+                 */
+                // TODO: move this
+                if (x % game.width <= 2)
+                {
+                    game.Translate(800, 0);
+                }
+                
+
+            }
+            else if (_currentState != State.FALLING)
+            {
+                _wasMovingLeft = false;
+            }
+
+
+
+            if (Input.GetKey(Key.D) && _currentState != State.CLIMBING && _currentState != State.FALLING)
+            {
+                _wasMovingRight = true;
+                move(speed, 0);
+                if (_mirrorX)
+                {
+                    Mirror(false, false);
+                }
+
+                if (_currentState == State.IDLE)
+                {
+                    _currentState = State.MOVING;
+                }
+
+                if (x % game.width >= 797)
+                {
+                    game.Translate(-800, 0);
+                }
+            }
+            else if (_currentState != State.FALLING)
+            {
+                _wasMovingRight = false;
+            }
+
+            if (Input.GetKey(Key.W) && _currentState != State.FALLING && _currentState != State.JUMPING)
+            {
+                if (_canClimb && e < 94)
+                {
+                    _currentState = State.CLIMBING;
+                    y -= 1.5f;
+                    e++;
+
+                }
+
+                if (e > 93)
+                {
+                    _currentState = State.IDLE;
+                }
+
+            }
+
+            if (Input.GetKey(Key.S) && _currentState != State.FALLING && _currentState != State.JUMPING)
+            {
+
+                if (_canClimb && e > 0)
+                {
+                    e--;
+                    _currentState = State.CLIMBING;
+                    y += 1.5f;
+
+                }
+                else
+                {
+                    _currentState = State.IDLE;
+                }
+
+            }
+            if (Input.GetKey(Key.SPACE) && _grounding && _currentState != State.CLIMBING)
+            {
+                /*if (Input.GetKey(Key.A)){
+                    _wasMovingLeft = true;
+                    _wasMovingRight = false;
+                }
+                else if (Input.GetKey(Key.D))
+                {
+                    _wasMovingLeft = false;
+                    _wasMovingRight = true;
+                }
+                else
+                {
+                    _wasMovingLeft = false;
+                    _wasMovingRight = false;
+                }
+                */
+                _currentState = State.JUMPING;
+                _velocity = 5;
+
+            }
+            if (Input.GetMouseButtonDown(0) && (_currentState == State.IDLE || _currentState == State.MOVING) && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
+            {
+                _currentState = State.ATTACKING;
+            }
+        }
+
+
+        protected void move(float moveX, float moveY)
+        {
+
+            x = x + moveX;
+            y = y + moveY;
+           
+        }
+        
     }
 }

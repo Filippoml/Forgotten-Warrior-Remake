@@ -6,9 +6,14 @@ using System.Threading.Tasks;
 
 namespace GXPEngine.Classes
 {
-    class Enemy 
+    class Enemy : AnimationSprite
     {
-        public Enemy() 
+        public Enemy(string filename, int cols, int rows) :base(filename,cols, rows)
+        {
+
+        }
+
+        public void TestMethod()
         {
 
         }

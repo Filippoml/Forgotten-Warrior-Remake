@@ -17,8 +17,6 @@ namespace GXPEngine.Classes
             visible = false;
         }
 
-
-
         public void SetVisible(bool value)
         {
             visible = value;

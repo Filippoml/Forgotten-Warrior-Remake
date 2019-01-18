@@ -41,6 +41,15 @@ namespace GXPEngine.Classes
         private Weapon _currentWeapon;
 
         private bool _wasMovingRight = false, _wasMovingLeft = false;
+
+        private LifeBar _lifeBar;
+
+        private int _lifePoints;
+
+        GameObject[] _collisions;
+
+
+        private Sprite _hit_sprite;
         /// <summary>
         /// Defines the State
         /// </summary>
@@ -84,12 +93,19 @@ namespace GXPEngine.Classes
             _currentWeapon = new Weapon();
             AddChild(_currentWeapon);
 
-            _colliderBox = new Ray("Data/HitBox.png");
+            _colliderBox = new Ray("Data/HitBox.png", this);
             _colliderBox.SetOrigin(-12, 0);
             AddChild(_colliderBox);
 
-            
-            
+             _lifeBar = new LifeBar();
+            AddChild(_lifeBar);
+
+            _lifePoints = 100;
+
+            _hit_sprite = new Sprite("Data/hit.png");
+            AddChild(_hit_sprite);
+            _hit_sprite.visible = false;
+            _hit_sprite.SetScaleXY(0.8f);
         }
         float old_y = 0;
         int e = 0;
@@ -127,8 +143,8 @@ namespace GXPEngine.Classes
             // TODO: put this in an Animate method:
             if (counter == (60 / frameRate))
             {
-
-                _currentWeapon.SetVisible(false, false);
+                _hit_sprite.visible = false;
+                _currentWeapon.SetVisible(false, false, -10, 10);
                 switch (_currentState)
                 {
                     case State.IDLE:
@@ -151,9 +167,40 @@ namespace GXPEngine.Classes
                         break;
                     case State.ATTACKING:
                         currentFrame = 4;
-                        _currentWeapon.SetVisible(true, _mirrorX);
+                        _currentWeapon.SetWeapon(0);
+                        _currentWeapon.SetVisible(true, _mirrorX, -10, 10);
                         _currentState = State.IDLE;
-                        break;
+
+                        _collisions = _currentWeapon.GetCollisions();
+                        for (int i = 0; i < _collisions.Length; i++)
+                        {
+                            if (_collisions[i] is Ray)
+                            {
+                                Ray _collision = _collisions[i] as Ray;
+                                if(_collision.getOwner().GetType() == typeof(Swordman))
+                                {
+                                    if(_collision.getOwner() is Swordman)
+                                    {
+                                        Swordman _swordman = _collision.getOwner() as Swordman;
+                                        _swordman.Attacked(50);
+                                        _hit_sprite.visible = true;
+                                        if (_mirrorX)
+                                        {
+                                            _hit_sprite.SetXY(-20, 15);
+                                        }
+                                        else
+                                        {
+                                            _hit_sprite.SetXY(40, 15);
+                                        }
+                                    }
+                                    
+                                }
+
+                                
+                                
+                            }
+                        }
+                            break;
                     case State.CLIMBING:
                         if (currentFrame > 10 || currentFrame < 10)
                         {
@@ -179,14 +226,14 @@ namespace GXPEngine.Classes
             _canClimb = false;
 
             // TODO: use this instead:
-            GameObject[] collisions = _colliderBox.GetCollisions();
+            _collisions = _colliderBox.GetCollisions();
             
-            for (int i = 0; i < collisions.Length; i++)
+            for (int i = 0; i < _collisions.Length; i++)
             {
   
-                if (collisions[i] is Tile)
+                if (_collisions[i] is Tile)
                 {
-                    Tile _tile = collisions[i] as Tile;
+                    Tile _tile = _collisions[i] as Tile;
                     if ((_tile.GetId() == 7 && (e < 94)) || (_tile.GetId() == 7 && _currentState == State.IDLE))
                     {
                         _stairs_x = _tile.x - 12;
@@ -292,6 +339,8 @@ namespace GXPEngine.Classes
                 y = 100;
                 _velocity = 0;
             }
+
+            _lifeBar.Update(_lifePoints);
         }
 
         private void keyMovement()
@@ -325,10 +374,7 @@ namespace GXPEngine.Classes
                  
                  */
                 // TODO: move this
-                if (x % game.width <= 2)
-                {
-                    game.Translate(800, 0);
-                }
+
                 
 
             }
@@ -339,6 +385,24 @@ namespace GXPEngine.Classes
 
 
 
+
+            /*
+                if (x % game.width <= 2 && _canScroll)
+                {
+                    _canScroll = false;
+                    game.Translate(800, 0);
+                }
+                else if (x % game.width >= 797 && _canScroll)
+                {
+                    _canScroll = false;
+                    game.Translate(-800, 0);
+                }
+                else
+                {
+                    _canScroll = true;
+                }
+            */
+     
             if (Input.GetKey(Key.D) && _currentState != State.CLIMBING && _currentState != State.FALLING)
             {
                 _wasMovingRight = true;
@@ -353,10 +417,6 @@ namespace GXPEngine.Classes
                     _currentState = State.MOVING;
                 }
 
-                if (x % game.width >= 797)
-                {
-                    game.Translate(-800, 0);
-                }
             }
             else if (_currentState != State.FALLING)
             {
@@ -437,5 +497,9 @@ namespace GXPEngine.Classes
             return _colliderBox;
         }
         
+        public void Attacked (int damage)
+        {
+            _lifePoints -= damage;
+        }
     }
 }

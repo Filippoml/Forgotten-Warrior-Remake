@@ -9,12 +9,17 @@ namespace GXPEngine.Classes
 {
     public class Ray : Sprite
     {
-        public Ray(String filename) : base(filename)
+        private GameObject _owner;
+        public Ray(String filename, GameObject owner) : base(filename)
         {
-
+            visible = false;
+            this._owner = owner;
         }
 
-
+        public GameObject getOwner()
+        {
+            return _owner;
+        }
 
         public bool isColliding()
         {

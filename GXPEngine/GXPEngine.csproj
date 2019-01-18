@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Enemy.cs" />
+    <Compile Include="Classes\LifeBar.cs" />
     <Compile Include="Classes\Player.cs" />
     <Compile Include="Classes\Ray.cs" />
     <Compile Include="Classes\Status.cs" />

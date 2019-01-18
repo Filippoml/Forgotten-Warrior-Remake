@@ -25,6 +25,12 @@ namespace GXPEngine.Classes
 
         private Ray _colliderBox, _colliderBox2;
 
+        private Weapon _currentWeapon;
+
+        private int _lifePoints;
+
+        private LifeBar _lifeBar;
+
         private enum State
         {
             /// <summary>
@@ -74,14 +80,27 @@ namespace GXPEngine.Classes
             _status = new Status();
             AddChild(_status);
 
+
+            _currentWeapon = new Weapon();
+            _currentWeapon.SetWeapon(4);
+            AddChild(_currentWeapon);
+
             _screenSection = Convert.ToInt32(Math.Floor(this.x / 800));
 
 
-            _colliderBox = new Ray("Data/HitBox.png");
-            _colliderBox2 = new Ray("Data/HitBox2.png");
+            _colliderBox = new Ray("Data/HitBox.png", this);
+            _colliderBox2 = new Ray("Data/HitBox2.png", this);
             _colliderBox2.SetOrigin(-20, -20);
             AddChild(_colliderBox);
             AddChild(_colliderBox2);
+
+
+            _lifeBar = new LifeBar();
+            _lifeBar.SetXY(-10, -5);
+            _lifeBar.visible = false;
+            AddChild(_lifeBar);
+
+            _lifePoints = 100;
         }
 
         private void OnTimedEvent(object sender, ElapsedEventArgs e)
@@ -103,7 +122,7 @@ namespace GXPEngine.Classes
             _colliding = false;
 
 
-            // TODO: use this instead:
+      
             GameObject[] collisions = _colliderBox.GetCollisions();
             for (int i = 0; i < collisions.Length; i++)
             {
@@ -118,19 +137,20 @@ namespace GXPEngine.Classes
                         y = _tile.y - this.height + 2;
                         _colliding = true;
                         }
-                        if(_screenSection != Convert.ToInt32(Math.Floor(this.x / 800))){
+                        if(_screenSection != Convert.ToInt32(Math.Floor(this.x / 810))){
                             _movingRight = !_movingRight;
                         }
 
-                        if(_tile.GetId() == 1 || _tile.GetId() == 3 || _screenSection != Convert.ToInt32(Math.Floor(this.x / 800)))
+                        if(_tile.GetId() == 1 || _tile.GetId() == 3 || _screenSection != Convert.ToInt32(Math.Floor(this.x / 810)))
                         {
-                            
+                        
                         if (_canFlip)
                             {
                                 _canFlip = false;
                                 _movingRight = !_movingRight;
                             }
                         }
+                    
                     if (_currentState == State.ATTACKING)
                     {
                         _currentState = State.IDLE;
@@ -138,14 +158,35 @@ namespace GXPEngine.Classes
 
 
                 }
-                else if(collisions[i] is Player)
-                {
-                    _currentState = State.ATTACKING;
-                }
+
      
             }
 
-            collisions = _colliderBox2.GetCollisions();
+
+            if (_currentState == State.MOVING && _currentState != State.FOLLOWING)
+            {
+                if (_movingRight)
+                {
+                    x += _speed;
+                }
+                else
+                {
+                    x -= _speed;
+                }
+            }
+            else if (_currentState == State.FOLLOWING)
+            {
+                if (_playerRight)
+                {
+                    x += _speed;
+                }
+                else
+                {
+                    x -= _speed;
+                }
+            }
+            Console.WriteLine("");
+            collisions = _currentWeapon.GetCollisions();
             for (int i = 0; i < collisions.Length; i++)
             {
                 if (collisions[i] is Ray)
@@ -153,6 +194,8 @@ namespace GXPEngine.Classes
                     if (collisions[i] == ((MyGame)game).Player.getCollider())
                     {
                         _currentState = State.ATTACKING;
+
+
                     }
                 }
             }
@@ -191,7 +234,7 @@ namespace GXPEngine.Classes
             }
 
             
-            //I NEED TO EDIT THE NAME OF THE VARIABLE
+            //I HAVE TO EDIT THE NAME OF THE VARIABLE
             if (test && _currentState  != State.FOLLOWING) {
                 test = false;
                 Random rnd = new Random();
@@ -224,7 +267,7 @@ namespace GXPEngine.Classes
                             _canFlip = true;
                             if (_direction == 1)
                             {
-                                _movingRight = false;
+                                _movingRight = true;
                             }
                             else
                             {
@@ -243,33 +286,17 @@ namespace GXPEngine.Classes
                 }
             }
 
-            
-            if (_currentState == State.MOVING && _currentState != State.FOLLOWING)
-            {
-                if (_movingRight)
-                {
-                    x += _speed;
-                }
-                else
-                {
-                    x -= _speed;
-                }
-            }
-            else if(_currentState == State.FOLLOWING)
-            {
-                if (_playerRight)
-                {
-                    x += _speed;
-                }
-                else
-                {
-                    x -= _speed;
-                }
-            }
 
-
+            if (_counter == 1)
+            {
+                _lifeBar.visible = false;
+            }
             if (_counter == (60 / _frameRate))
             {
+        
+
+
+                _currentWeapon.SetVisible(false, _mirrorX, -25 , 15);
                 if (_movingRight)
                 {
                     if (_mirrorX)
@@ -310,17 +337,21 @@ namespace GXPEngine.Classes
                         _status.SetFrame(2);
                         break;
                     case State.ATTACKING:
-                        Console.WriteLine(currentFrame);
                         _frameRate = 8;
                         if (currentFrame == 2)
                         {
                             currentFrame = 1;
+                            _currentWeapon.SetVisible(false, _mirrorX, -25, 15);
                         }
                         else
                         {
                             currentFrame = 2;
+                            _currentWeapon.SetVisible(true, _mirrorX, -25, 15);
+                            ((MyGame)game).Player.Attacked(10);
                         }
+          
 
+                        _status.SetVisible(false);
                         break;
                 }
 
@@ -335,7 +366,30 @@ namespace GXPEngine.Classes
                 _velocity += 0.2f;
                 y += _velocity;
             }
-            
         }
+
+        public void Attacked(int damage)
+        {
+            if (((MyGame)game).Player.x > this.x)
+            {
+                x -= 10;
+            }
+            else if (((MyGame)game).Player.x < this.x)
+            {
+                x += 10;
+            }
+
+            _lifePoints -= damage;
+            _lifeBar.visible = true;
+            _lifeBar.Update(_lifePoints);
+        }
+
+        public Ray getCollider()
+        {
+            return _colliderBox;
+        }
+
     }
+
+
 }

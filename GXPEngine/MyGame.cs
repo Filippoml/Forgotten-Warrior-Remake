@@ -63,6 +63,8 @@ public class MyGame : Game
         set { id_tiles = value; }
     }
 
+    private int _scrollIndex = 0;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MyGame"/> class.
     /// </summary>
@@ -72,7 +74,7 @@ public class MyGame : Game
         objects = new AnimationSprite[1000];
         id_tiles = new int[1000];
         Tiles = new Tile[1000];
-
+        
         //Background creation
         Bitmap Bmp = new Bitmap(width, height);
         using (Graphics gfx = Graphics.FromImage(Bmp))
@@ -165,7 +167,18 @@ public class MyGame : Game
                 }
             }
         }
-        // TODO: put scrolling code here (or later in level)
+
+        if ((int)Math.Floor(Player.x / 800) < _scrollIndex)
+        {
+            _scrollIndex = (int)Math.Floor(Player.x / 800);
+            game.Translate(800, 0);
+        }
+        else if ((int)Math.Floor(Player.x / 800) > _scrollIndex)
+        {
+            _scrollIndex = (int)Math.Floor(Player.x / 800);
+            game.Translate(-800, 0);
+        }
+  
 
     }
 

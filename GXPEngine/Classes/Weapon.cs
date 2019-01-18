@@ -16,25 +16,24 @@ namespace GXPEngine.Classes
 
         }
 
-        public void SetVisible(bool value, bool mirrored)
+        public void SetVisible(bool value, bool mirrored, int mirroredOffset1, int mirroredOffset2)
         {
             visible = value;
-            if (value)
-            {
+
                 Mirror(mirrored, false);
                 if (mirrored)
                 {
-                    x = -10;
+                    x = mirroredOffset1;
                 }
                 else
                 {
-                    x = 10;
+                    x = mirroredOffset2;
                 }
-            }
+            
         }
-        public void SetWeapon()
+        public void SetWeapon(int weapon_number)
         {
-
+            currentFrame = weapon_number;
         }
 
         void Update()

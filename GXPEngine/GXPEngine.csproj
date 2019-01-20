@@ -50,13 +50,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Enemy.cs" />
+    <Compile Include="Classes\Fire.cs" />
+    <Compile Include="Classes\HUD.cs" />
     <Compile Include="Classes\LifeBar.cs" />
     <Compile Include="Classes\Player.cs" />
+    <Compile Include="Classes\Projectile.cs" />
     <Compile Include="Classes\Ray.cs" />
     <Compile Include="Classes\Status.cs" />
     <Compile Include="Classes\Swordman.cs" />
     <Compile Include="Classes\Weapon.cs" />
     <Compile Include="Classes\Tile.cs" />
+    <Compile Include="Classes\Wizard.cs" />
     <Compile Include="MyGame.cs" />
     <Compile Include="GXPEngine\Canvas.cs" />
     <Compile Include="GXPEngine\Game.cs" />

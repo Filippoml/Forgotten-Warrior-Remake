@@ -30,16 +30,9 @@ public class MyGame : Game
     /// </summary>
     private static int[] id_tiles;
 
-    public Player Player
-    {
-        get
-        {
-            return player;
-        }
-    }
     Player player;
 
-
+    HUD _hud;
     /// <summary>
     /// Defines the num_objects
     /// </summary>
@@ -143,19 +136,39 @@ public class MyGame : Game
         Swordman swordman = new Swordman(1000, 1000);
 
         AddChild(swordman);
+
+        Fire fire = new Fire(500, 1000);
+
+
+        AddChild(fire);
+
+        Wizard wizard = new Wizard(300, 700);
+
+        AddChild(wizard);
+
         AddChild(player);
 
+        _hud = new HUD();
+
+        AddChild(_hud);
 
         game.Translate(0, -600);
 
 
+
+
+
+        
     }
+
+    public Player GetPlayer() => player;
 
     /// <summary>
     /// The Update
     /// </summary>
-     void Update()
+    void Update()
     {
+        _hud.Update();
         for (int i = 0; i < objects.Length; i++)
         {
             if (objects[i] != null)
@@ -168,14 +181,14 @@ public class MyGame : Game
             }
         }
 
-        if ((int)Math.Floor(Player.x / 800) < _scrollIndex)
+        if ((int)Math.Floor(player.x / 800) < _scrollIndex)
         {
-            _scrollIndex = (int)Math.Floor(Player.x / 800);
+            _scrollIndex = (int)Math.Floor(player.x / 800);
             game.Translate(800, 0);
         }
-        else if ((int)Math.Floor(Player.x / 800) > _scrollIndex)
+        else if ((int)Math.Floor(player.x / 800) > _scrollIndex)
         {
-            _scrollIndex = (int)Math.Floor(Player.x / 800);
+            _scrollIndex = (int)Math.Floor(player.x / 800);
             game.Translate(-800, 0);
         }
   

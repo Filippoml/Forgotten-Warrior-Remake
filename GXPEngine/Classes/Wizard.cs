@@ -1,14 +1,16 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using System.Timers;
 using GXPEngine.GXPEngine;
 
 namespace GXPEngine.Classes
 {
-    /// <summary>
-    /// Defines the <see cref="Swordman" />
-    /// </summary>
-    internal class Swordman : Enemy
+    public class Wizard : AnimationSprite
     {
+
         /// <summary>
         /// Defines the _colliding
         /// </summary>
@@ -18,9 +20,9 @@ namespace GXPEngine.Classes
 
         private int _counter = 0, _frameRate = 12, _screenSection;
 
-        private bool _movingRight = false, _playerRight = false, _canFlip = true;
+        private bool _movingRight = false, _canFlip = true, _canSpawnProjectile;
 
-        private System.Timers.Timer _timer, _timer2;
+        private System.Timers.Timer _timer, _timer2, _timer3;
         private Status _status;
 
         private Ray _colliderBox, _colliderBox2;
@@ -56,10 +58,10 @@ namespace GXPEngine.Classes
             ATTACKING,
             CLIMBING,
             SLEEPING,
-            FOLLOWING,
+            SEEING,
             DYING
         }
-
+        
         /// <summary>
         /// Defines the _currentState
         /// </summary>
@@ -71,7 +73,7 @@ namespace GXPEngine.Classes
         /// <param name="y">The y<see cref="float"/></param>
         /// 
         bool test = true;
-        public Swordman(float x, float y) : base("Data/swordman.png", 5, 1)
+        public Wizard(float x, float y) : base("Data/wizard.png", 5, 1)
         {
             SetScaleXY(1.2f);
             this.x = x;
@@ -87,6 +89,11 @@ namespace GXPEngine.Classes
             _timer2.Elapsed += new ElapsedEventHandler(OnTimedEvent2);
             _timer2.Interval = 500;
             _timer2.Enabled = false;
+
+            _timer3 = new System.Timers.Timer();
+            _timer3.Elapsed += new ElapsedEventHandler(OnTimedEvent3);
+            _timer3.Interval = 1000;
+            _timer3.Enabled = false;
 
             _status = new Status();
             AddChild(_status);
@@ -119,8 +126,15 @@ namespace GXPEngine.Classes
             _hitSprite.SetScaleXY(0.8f);
             _hitSprite.SetXY(0, 15);
 
-
             _player = ((MyGame)game).GetPlayer();
+        }
+
+        private void OnTimedEvent3(object sender, ElapsedEventArgs e)
+        {
+            _timer3.Enabled = false;
+            _canSpawnProjectile = true;
+
+            _status.SetVisible(false);
         }
 
         private void OnTimedEvent2(object sender, ElapsedEventArgs e)
@@ -140,7 +154,7 @@ namespace GXPEngine.Classes
         /// </summary>
         internal void Update()
         {
-          
+
 
 
             _counter++;
@@ -180,10 +194,7 @@ namespace GXPEngine.Classes
                             }
                         }
 
-                        if (_currentState == State.ATTACKING)
-                        {
-                            _currentState = State.IDLE;
-                        }
+   
 
 
                     }
@@ -192,7 +203,7 @@ namespace GXPEngine.Classes
                 }
 
 
-                if (_currentState == State.MOVING && _currentState != State.FOLLOWING)
+                if (_currentState == State.MOVING && _currentState != State.ATTACKING)
                 {
                     if (_movingRight)
                     {
@@ -203,58 +214,40 @@ namespace GXPEngine.Classes
                         x -= _speed;
                     }
                 }
-                else if (_currentState == State.FOLLOWING)
-                {
-                    if (_playerRight)
-                    {
-                        x += _speed;
-                    }
-                    else
-                    {
-                        x -= _speed;
-                    }
-                }
-
-                collisions = _currentWeapon.GetCollisions();
-                for (int i = 0; i < collisions.Length; i++)
-                {
-                    if (collisions[i] is Ray)
-                    {
-                        if (collisions[i] == _player.getCollider())
-                        {
-                            _currentState = State.ATTACKING;
 
 
-                        }
-                    }
-                }
 
-
-                if (_currentState != State.SLEEPING && Math.Floor(this.x / 800) == Math.Floor(_player.x / 800) && Math.Abs(this.y - _player.y) < 100)
+                
+                if (_currentState != State.SLEEPING && Math.Floor(this.x / 800) == Math.Floor(_player.x / 800) && _player.y - 2 <= this.y)
                 {
                     //Detect player
                     if (_player.x > this.x && !_mirrorX && _currentState != State.ATTACKING)
                     {
-                        _playerRight = true;
-                        _currentState = State.FOLLOWING;
+
+
+
+                        _status.SetVisible(true);
+                        _status.SetFrame(2);                        
+
+                        _currentState = State.ATTACKING;
+                       
+
                     }
                     else if (_player.x < this.x && _mirrorX && _currentState != State.ATTACKING)
                     {
-                        _playerRight = false;
-                        _currentState = State.FOLLOWING;
+             
+                        _status.SetVisible(true);
+                        _status.SetFrame(2);
+
+
+                        _currentState = State.ATTACKING;
                     }
-                    else
-                    {
-                        if (_currentState == State.FOLLOWING)
-                        {
-                            _currentState = State.IDLE;
-                        }
-                    }
+
                 }
                 else
                 {
 
-                    if (_currentState == State.FOLLOWING)
+                    if (_currentState == State.ATTACKING)
                     {
                         _currentState = State.IDLE;
                     }
@@ -264,7 +257,7 @@ namespace GXPEngine.Classes
 
 
                 //I HAVE TO EDIT THE NAME OF THE VARIABLE
-                if (test && _currentState != State.FOLLOWING)
+                if (test && _currentState != State.ATTACKING)
                 {
                     test = false;
                     Random rnd = new Random();
@@ -326,10 +319,22 @@ namespace GXPEngine.Classes
 
             if (_counter == (60 / _frameRate))
             {
-               
 
+                if (_currentState == State.ATTACKING)
+                {
+                    if (_player.x > this.x)
+                    {
+                        _movingRight = true;
+                    }
+                    else if (_player.x < this.x)
+                    {
+                        _movingRight = false;
+                    }
 
-                _currentWeapon.SetVisible(false, _mirrorX, -25 , 15);
+                }
+
+                _currentWeapon.SetVisible(false, _mirrorX, -25, 15);
+                
                 if (_movingRight)
                 {
                     if (_mirrorX)
@@ -346,9 +351,8 @@ namespace GXPEngine.Classes
                         Mirror(true, false);
                     }
                 }
-                if (_currentState != State.ATTACKING && _currentState != State.DYING)
+                if ( _currentState != State.DYING)
                 {
-                    _frameRate = 12;
                     if (currentFrame > 0)
                     {
                         currentFrame = 0;
@@ -361,35 +365,37 @@ namespace GXPEngine.Classes
 
                 switch (_currentState)
                 {
-                   
+
                     case State.SLEEPING:
                         _status.floating();
                         break;
-                    case State.FOLLOWING:
-                        _status.SetVisible(true);
-                        _status.SetFrame(2);
-                        break;
                     case State.ATTACKING:
-                        _frameRate = 8;
-                        if (currentFrame == 2)
+
+                        _timer3.Enabled = true;
+
+                        if (_canSpawnProjectile)
                         {
-                            currentFrame = 1;
-                            _currentWeapon.SetVisible(false, _mirrorX, -25, 15);
+
+
+                            Projectile _projectile = new Projectile(x,y,!_mirrorX);
+
+
+
+                            ((MyGame)game).AddChild(_projectile);
+
+                            _canSpawnProjectile = false;
                         }
-                        else
-                        {
-                            currentFrame = 2;
-                            _currentWeapon.SetVisible(true, _mirrorX, -25, 15);
-                            _player.Attacked(10);
-                        }
-                        _status.SetVisible(false);
+                    
+                        
+                        
+
                         break;
                     case State.DYING:
                         if (currentFrame == 3)
                         {
                             currentFrame = 4;
                         }
-                        else if(currentFrame == 4)
+                        else if (currentFrame == 4)
                         {
                             this.Destroy();
                         }
@@ -404,7 +410,7 @@ namespace GXPEngine.Classes
                 _hitSprite.visible = false;
             }
 
-            
+
 
             if (!_colliding)
             {
@@ -429,7 +435,7 @@ namespace GXPEngine.Classes
             _lifeBar.Update(_lifePoints);
             _timer2.Enabled = true;
 
-            Console.WriteLine(_lifePoints);
+            
             _hitSprite.visible = true;
 
             if (_player.x > this.x)
@@ -441,7 +447,7 @@ namespace GXPEngine.Classes
                 _movingRight = false;
             }
 
-            if(_lifePoints <= 0)
+            if (_lifePoints <= 0)
             {
                 _currentState = State.DYING;
             }
@@ -453,6 +459,4 @@ namespace GXPEngine.Classes
         }
 
     }
-
-
 }

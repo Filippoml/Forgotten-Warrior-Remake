@@ -87,7 +87,7 @@ namespace GXPEngine.Classes
             {
                 //_background2.x = 8.6f;
             }
-            Console.WriteLine(_background3.width);
+            
         }
 
 

@@ -32,7 +32,7 @@ namespace GXPEngine.Classes
         /// <summary>
         /// Defines the _moving, _grounding, _jumping
         /// </summary>
-        private bool _grounding = false, _canClimb = false;
+        private bool _grounding = false, _canClimb = false, _attacked;
 
         private float _stairs_x;
 
@@ -48,8 +48,8 @@ namespace GXPEngine.Classes
 
         GameObject[] _collisions;
 
+        private Sprite _hitSprite;
 
-        private Sprite _hit_sprite;
         /// <summary>
         /// Defines the State
         /// </summary>
@@ -102,10 +102,13 @@ namespace GXPEngine.Classes
 
             _lifePoints = 100;
 
-            _hit_sprite = new Sprite("Data/hit.png");
-            AddChild(_hit_sprite);
-            _hit_sprite.visible = false;
-            _hit_sprite.SetScaleXY(0.8f);
+            _hitSprite = new Sprite("Data/hit.png");
+            AddChild(_hitSprite);
+            _hitSprite.visible = false;
+            _hitSprite.SetScaleXY(0.8f);
+            _hitSprite.SetXY(15, 15);
+
+
         }
         float old_y = 0;
         int e = 0;
@@ -143,7 +146,7 @@ namespace GXPEngine.Classes
             // TODO: put this in an Animate method:
             if (counter == (60 / frameRate))
             {
-                _hit_sprite.visible = false;
+
                 _currentWeapon.SetVisible(false, false, -10, 10);
                 switch (_currentState)
                 {
@@ -183,15 +186,7 @@ namespace GXPEngine.Classes
                                     {
                                         Swordman _swordman = _collision.getOwner() as Swordman;
                                         _swordman.Attacked(50);
-                                        _hit_sprite.visible = true;
-                                        if (_mirrorX)
-                                        {
-                                            _hit_sprite.SetXY(-20, 15);
-                                        }
-                                        else
-                                        {
-                                            _hit_sprite.SetXY(40, 15);
-                                        }
+                                        i = _collisions.Length;
                                     }
                                     
                                 }
@@ -215,10 +210,24 @@ namespace GXPEngine.Classes
                     
                 }
 
+                //Damaged effect
+                if(!visible)
+                {
+
+                    visible = true;
+                    
+                }
+                else if(visible && _attacked)
+                {
+                    visible = false;
+                    _attacked = false;
+                    _hitSprite.visible = false;
+                }
+
 
                 counter = 0;
 
-
+                
             }
             
             _grounding = false;
@@ -247,8 +256,8 @@ namespace GXPEngine.Classes
                     if (_tile.GetId() >= 1 && _tile.GetId() <= 3 && _currentState != State.JUMPING && _currentState != State.CLIMBING)
                     {
                         _grounding = true;
-                        
-                        y = _tile.y - height + 2;
+
+                        y = _tile.y - height + 9;
                     }
 
 
@@ -336,7 +345,7 @@ namespace GXPEngine.Classes
             if (y > 1100)
             {
                 x = 100;
-                y = 100;
+                y = 1000;
                 _velocity = 0;
             }
 
@@ -345,7 +354,7 @@ namespace GXPEngine.Classes
 
         private void keyMovement()
         {
-            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING && _currentState != State.FALLING)
+            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING && _currentState != State.FALLING && !Input.GetKey(Key.D))
             {
 
                 _wasMovingLeft = true;
@@ -403,7 +412,7 @@ namespace GXPEngine.Classes
                 }
             */
      
-            if (Input.GetKey(Key.D) && _currentState != State.CLIMBING && _currentState != State.FALLING)
+            if (Input.GetKey(Key.D) && _currentState != State.CLIMBING && _currentState != State.FALLING && !Input.GetKey(Key.A))
             {
                 _wasMovingRight = true;
                 move(speed, 0);
@@ -499,7 +508,11 @@ namespace GXPEngine.Classes
         
         public void Attacked (int damage)
         {
+            _hitSprite.visible = true;
             _lifePoints -= damage;
+            visible = false;
+            _attacked = true;
+
         }
     }
 }

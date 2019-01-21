@@ -23,7 +23,7 @@ namespace GXPEngine.Classes
         private System.Timers.Timer _timer, _timer2;
         private Status _status;
 
-        private Ray _colliderBox, _colliderBox2;
+        private Collider _colliderBox, _colliderBox2;
 
         private Weapon _currentWeapon;
 
@@ -99,8 +99,8 @@ namespace GXPEngine.Classes
             _screenSection = Convert.ToInt32(Math.Floor(this.x / 800));
 
 
-            _colliderBox = new Ray("Data/HitBox.png", this);
-            _colliderBox2 = new Ray("Data/HitBox2.png", this);
+            _colliderBox = new Collider("Data/HitBox.png", this);
+            _colliderBox2 = new Collider("Data/HitBox2.png", this);
             _colliderBox2.SetOrigin(-20, -20);
             AddChild(_colliderBox);
             AddChild(_colliderBox2);
@@ -218,7 +218,7 @@ namespace GXPEngine.Classes
                 collisions = _currentWeapon.GetCollisions();
                 for (int i = 0; i < collisions.Length; i++)
                 {
-                    if (collisions[i] is Ray)
+                    if (collisions[i] is Collider)
                     {
                         if (collisions[i] == _player.getCollider())
                         {
@@ -429,7 +429,7 @@ namespace GXPEngine.Classes
             _lifeBar.Update(_lifePoints);
             _timer2.Enabled = true;
 
-            Console.WriteLine(_lifePoints);
+            
             _hitSprite.visible = true;
 
             if (_player.x > this.x)
@@ -447,7 +447,7 @@ namespace GXPEngine.Classes
             }
         }
 
-        public Ray getCollider()
+        public Collider getCollider()
         {
             return _colliderBox;
         }

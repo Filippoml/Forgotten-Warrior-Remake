@@ -57,7 +57,7 @@ namespace GXPEngine.Classes
             GameObject [] collisions = GetCollisions();
             for (int i = 0; i < collisions.Length; i++)
             {
-                if (collisions[i] is Ray)
+                if (collisions[i] is Collider)
                 {
                     if (collisions[i] == _player.getCollider())
                     {

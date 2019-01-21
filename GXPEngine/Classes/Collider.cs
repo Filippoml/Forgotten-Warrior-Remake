@@ -7,10 +7,10 @@ using GXPEngine.GXPEngine;
 
 namespace GXPEngine.Classes
 {
-    public class Ray : Sprite
+    public class Collider : Sprite
     {
         private GameObject _owner;
-        public Ray(String filename, GameObject owner) : base(filename)
+        public Collider(String filename, GameObject owner) : base(filename)
         {
             visible = false;
             this._owner = owner;

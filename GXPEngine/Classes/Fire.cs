@@ -25,10 +25,8 @@ namespace GXPEngine.Classes
             this.y = y;
 
             //Init
-            currentFrame = 0;
-            _frameCounter = 0;
             _frameRate = 12;
-            _speed = 4;
+            _speed = 2.5f;
             _player = ((MyGame)game).GetPlayer();
 
             //Check in which part of the screen it is
@@ -46,7 +44,7 @@ namespace GXPEngine.Classes
             _onGround = false;
             _frameCounter++;
 
-            execNotEveryFrame();
+            Animate();
 
             checkCollisions();
 
@@ -55,7 +53,7 @@ namespace GXPEngine.Classes
             applyGravity();
         }
 
-        private void execNotEveryFrame()
+        private void Animate()
         {
             if (_frameCounter == (60 / _frameRate))
             {

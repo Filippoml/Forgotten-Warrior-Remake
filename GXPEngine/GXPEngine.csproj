@@ -55,7 +55,7 @@
     <Compile Include="Classes\LifeBar.cs" />
     <Compile Include="Classes\Player.cs" />
     <Compile Include="Classes\Projectile.cs" />
-    <Compile Include="Classes\Ray.cs" />
+    <Compile Include="Classes\Collider.cs" />
     <Compile Include="Classes\Status.cs" />
     <Compile Include="Classes\Swordman.cs" />
     <Compile Include="Classes\Weapon.cs" />

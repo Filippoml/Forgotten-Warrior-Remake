@@ -5,6 +5,7 @@ using GXPEngine.Classes;
 using GXPEngine.Core;
 using GXPEngine.GXPEngine;
 using TiledMapParser;
+using System.Windows;
 
 /// <summary>
 /// Defines the <see cref="MyGame" />
@@ -84,18 +85,24 @@ public class MyGame : Game
 
         Map level = MapParser.ReadMap("Data/level.tmx");
 
+
         for (int i = 0; i<level.Layers.Length; i++)
         {
             Layer _currentLayer = level.Layers[i];
 
             Data leveldata = _currentLayer.Data;
-  
 
-         
+
 
 
             String levelData = _currentLayer.Data.innerXML.ToString();
-            levelData = levelData.Replace("\n", "");
+
+
+
+
+
+
+                  levelData = levelData.Replace("\n", "");
 
             int[] tiles = Array.ConvertAll(levelData.Split(','), int.Parse);
 
@@ -130,21 +137,31 @@ public class MyGame : Game
             }
         }
 
+        player = new Player(100, 1000);
 
-        player = new Player();
+        for (int i = 0; i < level.ObjectGroups[0].Objects.Length; i++)
+        {
+            TiledObject _object = level.ObjectGroups[0].Objects[i];
 
-        Swordman swordman = new Swordman(1000, 1000);
+            switch(_object.Type)
+            {
+                case "Swordman":
+                    Swordman swordman = new Swordman(_object.X, _object.Y);
+                    AddChild(swordman);
+                    break;
+                case "Fire":
+                    Fire fire = new Fire(_object.X, _object.Y);
+                    AddChild(fire);
+                    break;
+                case "Wizard":
+                    Wizard wizard = new Wizard(_object.X, _object.Y);
+                    AddChild(wizard);
+                    break;
+            }
+        }
+     
 
-        AddChild(swordman);
 
-        Fire fire = new Fire(500, 1000);
-
-
-        AddChild(fire);
-
-        Wizard wizard = new Wizard(300, 700);
-
-        AddChild(wizard);
 
         AddChild(player);
 

@@ -10,123 +10,68 @@ namespace GXPEngine.Classes
     public class Player : AnimationSprite
     {
         /// <summary>
-        /// Defines the counter
-        /// </summary>
-        private int counter = 0;
-
-        /// <summary>
         /// Defines the frameRate
         /// </summary>
-        private int frameRate = 12;
+        private int _frameCounter, _frameRate, _yClimb, _lifePoints;
 
-        /// <summary>
-        /// Defines the speed
-        /// </summary>
-        private int speed = 3;
+        private float _speed, _yVelocity, _stairs_x;
 
-        /// <summary>
-        /// Defines the _velocity
-        /// </summary>
-        private float _velocity = 0;
+        private bool _grounding, _canClimb, _attacked;
 
-        /// <summary>
-        /// Defines the _moving, _grounding, _jumping
-        /// </summary>
-        private bool _grounding = false, _canClimb = false, _attacked;
-
-        private float _stairs_x;
-
-        private Ray _colliderBox;
+        private Collider _colliderBox;
 
         private Weapon _currentWeapon;
-
-        private bool _wasMovingRight = false, _wasMovingLeft = false;
-
-        private LifeBar _lifeBar;
-
-        private int _lifePoints;
 
         GameObject[] _collisions;
 
         private Sprite _hitSprite;
 
-        /// <summary>
-        /// Defines the State
-        /// </summary>
         private enum State
         {
-            /// <summary>
-            /// Defines the IDLE
-            /// </summary>
             IDLE,
-            /// <summary>
-            /// Defines the MOVING
-            /// </summary>
             MOVING,
-            /// <summary>
-            /// Defines the JUMPING
-            /// </summary>
             JUMPING,
-
             FALLING, 
             ATTACKING,
             CLIMBING
         }
 
-        /// <summary>
-        /// Defines the _currentState
-        /// </summary>
         private State _currentState;
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Player"/> class.
-        /// </summary>
-        public Player() : base("Data/player.png", 2, 8)
+        public Player(float x, float y) : base("Data/player.png", 2, 8)
         {
-            SetFrame(9);
+            this.x = x;
+            this.y = y;
+
+            //Init
             SetScaleXY(1.2f);
             currentFrame = 0;
-            
-            x = 100;
-            y = 1000;
+            _lifePoints = 100;
+            _frameRate = 12;
+            _speed = 3;
 
+
+            //Creation Child Objects
             _currentWeapon = new Weapon();
             AddChild(_currentWeapon);
 
-            _colliderBox = new Ray("Data/HitBox.png", this);
+            _colliderBox = new Collider("Data/HitBox.png", this);
             _colliderBox.SetOrigin(-12, 0);
             AddChild(_colliderBox);
 
-             _lifeBar = new LifeBar();
-            AddChild(_lifeBar);
-
-            _lifePoints = 100;
-
             _hitSprite = new Sprite("Data/hit.png");
-            AddChild(_hitSprite);
             _hitSprite.visible = false;
             _hitSprite.SetScaleXY(0.8f);
             _hitSprite.SetXY(15, 15);
-
-
+            AddChild(_hitSprite);
         }
-        float old_y = 0;
-        int e = 0;
-        bool up = false, down = false;
-        /// <summary>
-        /// The SetState
-        /// </summary>
-        /// <param name="state">The state<see cref="State"/></param>
 
 
-        /// <summary>
-        /// The Update
-        /// </summary>
+
+
         void Update()
         {
-
-
-
+            //???
             // TODO: structure this code with a switch case based on state (easier to understand, though it probably introduces some code duplication)
             if (_currentState == State.MOVING && _currentState != State.CLIMBING)
             {
@@ -134,17 +79,88 @@ namespace GXPEngine.Classes
                 _currentState = State.IDLE;
             }
 
-            float old_x = x;
-    
+            _frameCounter++;
 
-
-            counter++;
 
 
             keyMovement();
+            Animate();
 
-            // TODO: put this in an Animate method:
-            if (counter == (60 / frameRate))
+            _grounding = false;
+            _canClimb = false;
+
+
+            checkCollisions();
+            checkJumping();
+
+            if (_yVelocity < 0 && _currentState == State.JUMPING)
+            {
+                _currentState = State.IDLE;
+            }
+
+            if (_grounding && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
+            {
+                _currentState = State.IDLE;
+            }
+
+            applyGravity();
+
+            Console.WriteLine(_currentState);
+
+
+
+            //Respawn: just for testing
+            if (y > 1100)
+            {
+                x = 100;
+                y = 1000;
+                _yVelocity = 0;
+            }
+
+        }
+
+        private void checkJumping()
+        {
+             if (_currentState == State.JUMPING)
+            {
+                _yVelocity -= 0.2f;
+                y -= _yVelocity;
+            }
+        }
+
+        private void checkCollisions()
+        {
+            _collisions = _colliderBox.GetCollisions();
+
+            for (int i = 0; i < _collisions.Length; i++)
+            {
+                if (_collisions[i] is Tile)
+                {
+                    Tile _tile = _collisions[i] as Tile;
+                    if ((_tile.GetId() == 7 && (_yClimb < 94)) || (_tile.GetId() == 7 && _currentState == State.IDLE))
+                    {
+                        _stairs_x = _tile.x - 12;
+                        _canClimb = true;
+                    }
+
+                    //Check if player is colliding with ground tiles
+                    if (_tile.GetId() >= 1 && _tile.GetId() <= 3 && _currentState != State.JUMPING && _currentState != State.CLIMBING)
+                    {
+                        float old_y = y - (_tile.y - height + 9);
+
+                        if (old_y < 10)
+                        {
+                            y = _tile.y - height + 9;
+                            _grounding = true;
+                        }
+                    }
+                }
+            }
+        }
+
+        private void Animate()
+        {
+            if (_frameCounter == (60 / _frameRate))
             {
 
                 _currentWeapon.SetVisible(false, false, -10, 10);
@@ -161,12 +177,12 @@ namespace GXPEngine.Classes
                             NextFrame();
                         }
                         break;
-                    
+
                     case State.JUMPING:
-                            currentFrame = 6;
+                        currentFrame = 6;
                         break;
                     case State.FALLING:
-                            currentFrame = 7;
+                        currentFrame = 7;
                         break;
                     case State.ATTACKING:
                         currentFrame = 4;
@@ -177,25 +193,28 @@ namespace GXPEngine.Classes
                         _collisions = _currentWeapon.GetCollisions();
                         for (int i = 0; i < _collisions.Length; i++)
                         {
-                            if (_collisions[i] is Ray)
+                            if (_collisions[i] is Collider)
                             {
-                                Ray _collision = _collisions[i] as Ray;
-                                if(_collision.getOwner().GetType() == typeof(Swordman))
-                                {
-                                    if(_collision.getOwner() is Swordman)
-                                    {
-                                        Swordman _swordman = _collision.getOwner() as Swordman;
-                                        _swordman.Attacked(50);
-                                        i = _collisions.Length;
-                                    }
-                                    
-                                }
+                                Collider _collision = _collisions[i] as Collider;
 
-                                
-                                
+                                if (_collision.getOwner().GetType() == typeof(Swordman))
+                                {
+
+                                    Swordman _swordman = _collision.getOwner() as Swordman;
+                                    _swordman.Attacked(50);
+                                    i = _collisions.Length;
+
+
+                                }
+                                else if (_collision.getOwner().GetType() == typeof(Wizard))
+                                {
+                                    Wizard wizard = _collision.getOwner() as Wizard;
+                                    wizard.Attacked(50);
+                                    i = _collisions.Length;
+                                }
                             }
                         }
-                            break;
+                        break;
                     case State.CLIMBING:
                         if (currentFrame > 10 || currentFrame < 10)
                         {
@@ -207,215 +226,69 @@ namespace GXPEngine.Classes
                         }
                         x = _stairs_x;
                         break;
-                    
+
                 }
 
                 //Damaged effect
-                if(!visible)
+                if (!visible)
                 {
 
                     visible = true;
-                    
+
                 }
-                else if(visible && _attacked)
+                else if (visible && _attacked)
                 {
                     visible = false;
                     _attacked = false;
                     _hitSprite.visible = false;
                 }
 
-
-                counter = 0;
-
-                
+                _frameCounter = 0;
             }
-            
-            _grounding = false;
+        }
 
-            _canClimb = false;
-
-            // TODO: use this instead:
-            _collisions = _colliderBox.GetCollisions();
-            
-            for (int i = 0; i < _collisions.Length; i++)
-            {
-  
-                if (_collisions[i] is Tile)
-                {
-                    Tile _tile = _collisions[i] as Tile;
-                    if ((_tile.GetId() == 7 && (e < 94)) || (_tile.GetId() == 7 && _currentState == State.IDLE))
-                    {
-                        _stairs_x = _tile.x - 12;
-
-                        _canClimb = true;
-                    }
-
-         
-
-                    //Check if player is colliding with ground tiles
-                    if (_tile.GetId() >= 1 && _tile.GetId() <= 3 && _currentState != State.JUMPING && _currentState != State.CLIMBING)
-                    {
-                        _grounding = true;
-
-                        y = _tile.y - height + 9;
-                    }
-
-
-
-
-
-                    if (_tile.GetId() == 5 && _currentState != State.IDLE && _currentState != State.MOVING)
-                    {
-                       //_grounding = false;
-                    }
-
-
-
-                    /*
-                    if(_canClimb && !_grounding)
-                    {
-                        _currentState = State.CLIMBING;
-                    }
-                    */
-
-                }
-                    
-                }
-            
-
-
-
-            if (_grounding) {
-                old_y = y;
-            }
-
-            if (_currentState == State.JUMPING)
-            {
-                _velocity -= 0.2f;
-                y -= _velocity;
-            }
-
-            if (_velocity < 0 && _currentState == State.JUMPING)
-            {
-                _currentState = State.IDLE;
-            }
-
-            if (_grounding && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
-            {
-                _currentState = State.IDLE;
-
-            }
-
-            
-
-            //Gravity
+        private void applyGravity()
+        {
             if (!_grounding)
             {
                 if (_currentState != State.JUMPING && _currentState != State.CLIMBING)
                 {
-
-                    if (_velocity < 8)
+                    if (_yVelocity < 8)
                     {
-                        _velocity += 0.2f;
+                        _yVelocity += 0.2f;
                     }
-                    y += _velocity;
+                    y += _yVelocity;
                     _currentState = State.FALLING;
-
-                    if (_wasMovingLeft)
-                    {
-                        move(-speed, 0);
-                    }
-                    else if(_wasMovingRight)
-                    {
-                        move(speed, 0);
-                    }
                     
-
                     //Check if fallen on lower floor or jumped
-                    if (_velocity > 5)
+                    if (_yVelocity > 5)
                     {
-                        e = 0;
+                        _yClimb = 0;
                     }
-
                 }
             }
-
-
-
-            if (y > 1100)
-            {
-                x = 100;
-                y = 1000;
-                _velocity = 0;
-            }
-
-            _lifeBar.Update(_lifePoints);
         }
 
         private void keyMovement()
         {
-            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING && _currentState != State.FALLING && !Input.GetKey(Key.D))
+            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING && !Input.GetKey(Key.D))
             {
-
-                _wasMovingLeft = true;
-                move(-speed, 0);
-                    if (_currentState == State.IDLE)
-                    {
-                        _currentState = State.MOVING;
-                    }
-
-                    if (!_mirrorX)
-                    {
-                        Mirror(true, false);
-                    }
-         
-                /*
-                x = x - speed;
-
-
+                Move(-_speed, 0);
 
                 if (_currentState == State.IDLE)
                 {
                     _currentState = State.MOVING;
                 }
 
-                
-                 
-                 */
-                // TODO: move this
-
-                
-
+                if (!_mirrorX)
+                {
+                    Mirror(true, false);
+                }
             }
-            else if (_currentState != State.FALLING)
+  
+            if (Input.GetKey(Key.D) && _currentState != State.CLIMBING && !Input.GetKey(Key.A))
             {
-                _wasMovingLeft = false;
-            }
-
-
-
-
-            /*
-                if (x % game.width <= 2 && _canScroll)
-                {
-                    _canScroll = false;
-                    game.Translate(800, 0);
-                }
-                else if (x % game.width >= 797 && _canScroll)
-                {
-                    _canScroll = false;
-                    game.Translate(-800, 0);
-                }
-                else
-                {
-                    _canScroll = true;
-                }
-            */
-     
-            if (Input.GetKey(Key.D) && _currentState != State.CLIMBING && _currentState != State.FALLING && !Input.GetKey(Key.A))
-            {
-                _wasMovingRight = true;
-                move(speed, 0);
+                Move(_speed, 0);
                 if (_mirrorX)
                 {
                     Mirror(false, false);
@@ -425,24 +298,19 @@ namespace GXPEngine.Classes
                 {
                     _currentState = State.MOVING;
                 }
+            }
 
-            }
-            else if (_currentState != State.FALLING)
-            {
-                _wasMovingRight = false;
-            }
 
             if (Input.GetKey(Key.W) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
-                if (_canClimb && e < 94)
+                if (_canClimb && _yClimb < 94)
                 {
                     _currentState = State.CLIMBING;
                     y -= 1.5f;
-                    e++;
-
+                    _yClimb++;
                 }
 
-                if (e > 93)
+                if (_yClimb > 93)
                 {
                     _currentState = State.IDLE;
                 }
@@ -452,12 +320,11 @@ namespace GXPEngine.Classes
             if (Input.GetKey(Key.S) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
 
-                if (_canClimb && e > 0)
+                if (_canClimb && _yClimb > 0)
                 {
-                    e--;
+                    _yClimb--;
                     _currentState = State.CLIMBING;
                     y += 1.5f;
-
                 }
                 else
                 {
@@ -467,23 +334,8 @@ namespace GXPEngine.Classes
             }
             if (Input.GetKey(Key.SPACE) && _grounding && _currentState != State.CLIMBING)
             {
-                /*if (Input.GetKey(Key.A)){
-                    _wasMovingLeft = true;
-                    _wasMovingRight = false;
-                }
-                else if (Input.GetKey(Key.D))
-                {
-                    _wasMovingLeft = false;
-                    _wasMovingRight = true;
-                }
-                else
-                {
-                    _wasMovingLeft = false;
-                    _wasMovingRight = false;
-                }
-                */
                 _currentState = State.JUMPING;
-                _velocity = 5;
+                _yVelocity = 5;
 
             }
             if (Input.GetMouseButtonDown(0) && (_currentState == State.IDLE || _currentState == State.MOVING) && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
@@ -492,16 +344,7 @@ namespace GXPEngine.Classes
             }
         }
 
-
-        protected void move(float moveX, float moveY)
-        {
-
-            x = x + moveX;
-            y = y + moveY;
-           
-        }
-
-        public Ray getCollider()
+        public Collider getCollider()
         {
             return _colliderBox;
         }
@@ -509,10 +352,22 @@ namespace GXPEngine.Classes
         public void Attacked (int damage)
         {
             _hitSprite.visible = true;
-            _lifePoints -= damage;
+            if(_lifePoints - damage < 0)
+            {
+                _lifePoints = 0;
+            }
+            else
+            {
+                _lifePoints -= damage;
+            }
+
             visible = false;
             _attacked = true;
+        }
 
+        public int GetLifePoints()
+        {
+            return _lifePoints;
         }
     }
 }

@@ -21,6 +21,7 @@ namespace GXPEngine.Classes
         private bool _movingRight = false, _playerRight = false, _canFlip = true;
 
         private System.Timers.Timer _timer, _timer2;
+
         private Status _status;
 
         private Collider _colliderBox, _colliderBox2;
@@ -118,7 +119,6 @@ namespace GXPEngine.Classes
             _hitSprite.visible = false;
             _hitSprite.SetScaleXY(0.8f);
             _hitSprite.SetXY(0, 15);
-
 
             _player = ((MyGame)game).GetPlayer();
         }

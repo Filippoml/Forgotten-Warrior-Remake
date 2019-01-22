@@ -251,7 +251,11 @@ namespace TiledMapParser
 		public int Width;
 		[XmlAttribute("height")]
 		public int Height;
-		[XmlElement("data")]
+        [XmlAttribute("offsetx")]
+        public float offsetx;
+        [XmlAttribute("offsety")]
+        public float offsety;
+        [XmlElement("data")]
 		public Data Data;
 
 		override public string ToString() {

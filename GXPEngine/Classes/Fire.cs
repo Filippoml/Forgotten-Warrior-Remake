@@ -27,6 +27,7 @@ namespace GXPEngine.Classes
             //Init
             _frameRate = 12;
             _speed = 2.5f;
+
             _player = ((MyGame)game).GetPlayer();
 
             //Check in which part of the screen it is

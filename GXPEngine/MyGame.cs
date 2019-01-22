@@ -12,62 +12,17 @@ using System.Windows;
 /// </summary>
 public class MyGame : Game
 {
-    /// <summary>
-    /// Defines the sprite
-    /// </summary>
-    internal AnimationSprite sprite;
 
-    // TODO: no public static! (certainly no static)
 
-    /// <summary>
-    /// Defines the objects
-    /// </summary>
-    private static AnimationSprite[] objects;
-
-    private Tile[] Tiles; 
-
-    /// <summary>
-    /// Defines the id_tiles
-    /// </summary>
-    private static int[] id_tiles;
-
-    Player player;
-
-    HUD _hud;
-    /// <summary>
-    /// Defines the num_objects
-    /// </summary>
-    internal int num_objects = 0;
-
-    /// <summary>
-    /// Gets or sets the Objects
-    /// </summary>
-    public static AnimationSprite[] Objects
-    {
-        get { return objects; }
-        set { objects = value; }
-    }
-
-    /// <summary>
-    /// Gets or sets the Id_Tiles
-    /// </summary>
-    public static int[] Id_Tiles
-    {
-        get { return id_tiles; }
-        set { id_tiles = value; }
-    }
-
-    private int _scrollIndex = 0;
-
+    private HUD _hud;
+    private Level _level;
     /// <summary>
     /// Initializes a new instance of the <see cref="MyGame"/> class.
     /// </summary>
     public MyGame() : base(800, 600, false, false, pPixelArt: true)		// Create a window that's 800x600 and NOT fullscreen
     {
         
-        objects = new AnimationSprite[1000];
-        id_tiles = new int[1000];
-        Tiles = new Tile[1000];
+
         
         //Background creation
         Bitmap Bmp = new Bitmap(width, height);
@@ -82,103 +37,22 @@ public class MyGame : Game
         _background.width = 5000;
         _background.height = 5000;
 
+        _level = new Level(1);
+        _level.generateLevel();
+        AddChild(_level);
 
-        Map level = MapParser.ReadMap("Data/level.tmx");
-
-
-        for (int i = 0; i<level.Layers.Length; i++)
-        {
-            Layer _currentLayer = level.Layers[i];
-
-            Data leveldata = _currentLayer.Data;
-
-
-
-
-            String levelData = _currentLayer.Data.innerXML.ToString();
-
-
-
-
-
-
-                  levelData = levelData.Replace("\n", "");
-
-            int[] tiles = Array.ConvertAll(levelData.Split(','), int.Parse);
-
-            int columns = level.Layers[0].Width;
-            int rows = level.Layers[0].Height;
-            
-            for (int j = 0; j < tiles.Length; j++)
-            {
-
-                if (tiles[j] != 0)
-                {
-
-                    int x = j % columns;
-                    int y = j / columns;
-                    //sprite = new AnimationSprite(texture.bitmap, level.TileSets[0].Columns, level.TileSets[0].Rows);
-                    //sprite.currentFrame = tiles[j] - 1;
-
-                    Tiles[num_objects] = new Tile(tiles[j], level.TileSets[0].Image.FileName, level.TileSets[0].Columns, level.TileSets[0].Rows);
-                    Tiles[num_objects].currentFrame = tiles[j] - 1;
-
-                    objects[num_objects] = sprite;
-                    id_tiles[num_objects] = tiles[j];
-
-
-                    
-                    Tiles[num_objects].x = x * 30;
-                    Tiles[num_objects].y = y * 30;
-                    AddChild(Tiles[num_objects]);
-                    num_objects++;
-                }
-
-            }
-        }
-
-        player = new Player(100, 1000);
-
-        for (int i = 0; i < level.ObjectGroups[0].Objects.Length; i++)
-        {
-            TiledObject _object = level.ObjectGroups[0].Objects[i];
-
-            switch(_object.Type)
-            {
-                case "Swordman":
-                    Swordman swordman = new Swordman(_object.X, _object.Y);
-                    AddChild(swordman);
-                    break;
-                case "Fire":
-                    Fire fire = new Fire(_object.X, _object.Y);
-                    AddChild(fire);
-                    break;
-                case "Wizard":
-                    Wizard wizard = new Wizard(_object.X, _object.Y);
-                    AddChild(wizard);
-                    break;
-            }
-        }
-     
-
-
-
-        AddChild(player);
 
         _hud = new HUD();
-
+        _hud.SetXY(300, 1170);
         AddChild(_hud);
 
         game.Translate(0, -600);
-
-
-
-
-
-        
     }
 
-    public Player GetPlayer() => player;
+    public Player GetPlayer()
+    {
+        return _level.GetPlayer();
+    }
 
     /// <summary>
     /// The Update
@@ -186,30 +60,6 @@ public class MyGame : Game
     void Update()
     {
         _hud.Update();
-        for (int i = 0; i < objects.Length; i++)
-        {
-            if (objects[i] != null)
-            {
-                if (player.HitTest(objects[i]))
-                {
-                    i = objects.Length;
-                    //Console.WriteLine("test");
-                }
-            }
-        }
-
-        if ((int)Math.Floor(player.x / 800) < _scrollIndex)
-        {
-            _scrollIndex = (int)Math.Floor(player.x / 800);
-            game.Translate(800, 0);
-        }
-        else if ((int)Math.Floor(player.x / 800) > _scrollIndex)
-        {
-            _scrollIndex = (int)Math.Floor(player.x / 800);
-            game.Translate(-800, 0);
-        }
-  
-
     }
 
     /// <summary>

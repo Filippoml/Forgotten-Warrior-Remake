@@ -105,10 +105,6 @@ namespace GXPEngine.Classes
 
             applyGravity();
 
-            Console.WriteLine(_currentState);
-
-
-
             //Respawn: just for testing
             if (y > 1100)
             {
@@ -137,7 +133,9 @@ namespace GXPEngine.Classes
                 if (_collisions[i] is Tile)
                 {
                     Tile _tile = _collisions[i] as Tile;
-                    if ((_tile.GetId() == 7 && (_yClimb < 94)) || (_tile.GetId() == 7 && _currentState == State.IDLE))
+
+                    //TODO check this condition
+                    if ((_tile.GetId() == 20 && (_yClimb < 94)) || (_tile.GetId() == 20 && _currentState == State.IDLE))
                     {
                         _stairs_x = _tile.x - 12;
                         _canClimb = true;

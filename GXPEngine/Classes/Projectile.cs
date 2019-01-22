@@ -37,7 +37,6 @@ namespace GXPEngine.Classes
 
         void Update()
         {
-            Console.WriteLine(_speed);
             if (_hasToMoveRight)
             {
                 x += _speed;

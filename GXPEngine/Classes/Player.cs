@@ -12,7 +12,7 @@ namespace GXPEngine.Classes
         /// <summary>
         /// Defines the frameRate
         /// </summary>
-        private int _frameCounter, _frameRate, _yClimb, _lifePoints;
+        private int _frameCounter, _frameRate, _yClimb, _lifePoints, _yClimbdone;
 
         private float _speed, _yVelocity, _stairs_x;
 
@@ -64,6 +64,8 @@ namespace GXPEngine.Classes
             _hitSprite.SetScaleXY(0.8f);
             _hitSprite.SetXY(15, 15);
             AddChild(_hitSprite);
+
+            _yClimbdone = 110;
         }
 
 
@@ -135,7 +137,7 @@ namespace GXPEngine.Classes
                     Tile _tile = _collisions[i] as Tile;
 
                     //TODO check this condition
-                    if ((_tile.GetId() == 20 && (_yClimb < 94)) || (_tile.GetId() == 20 && _currentState == State.IDLE))
+                    if ((_tile.GetId() == 20 && (_yClimb < _yClimbdone)) || (_tile.GetId() == 20 && _currentState == State.IDLE))
                     {
                         _stairs_x = _tile.x - 12;
                         _canClimb = true;
@@ -154,6 +156,8 @@ namespace GXPEngine.Classes
                     }
                 }
             }
+
+            Console.WriteLine(_yClimb);
         }
 
         private void Animate()
@@ -301,14 +305,15 @@ namespace GXPEngine.Classes
 
             if (Input.GetKey(Key.W) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
-                if (_canClimb && _yClimb < 94)
+                if (_canClimb && _yClimb < _yClimbdone)
                 {
                     _currentState = State.CLIMBING;
                     y -= 1.5f;
                     _yClimb++;
                 }
 
-                if (_yClimb > 93)
+                //TODO check this
+                if (_yClimb == _yClimbdone)
                 {
                     _currentState = State.IDLE;
                 }

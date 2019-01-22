@@ -381,7 +381,7 @@ namespace GXPEngine.Classes
 
 
 
-                            ((MyGame)game).AddChild(_projectile);
+                            ((MyGame)game).GetLevel().AddChild(_projectile);
 
                             _canSpawnProjectile = false;
                         }

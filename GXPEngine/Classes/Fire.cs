@@ -59,7 +59,7 @@ namespace GXPEngine.Classes
             if (_frameCounter == (60 / _frameRate))
             {
 
-                if(DistanceTo(_player) > 100)
+                if(DistanceTo(_player) > _player.width)
                 {
                     _canDamage = true;
                 }

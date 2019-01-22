@@ -54,6 +54,11 @@ public class MyGame : Game
         return _level.GetPlayer();
     }
 
+    public Level GetLevel()
+    {
+        return _level;
+    }
+
     /// <summary>
     /// The Update
     /// </summary>

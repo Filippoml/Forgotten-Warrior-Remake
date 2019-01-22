@@ -79,7 +79,7 @@ namespace GXPEngine.Classes
 
                         Tiles[_num_objects] = new Tile(tiles[j], level.TileSets[tileset_number].Image.FileName, level.TileSets[tileset_number].Columns, level.TileSets[tileset_number].Rows);
                         Tiles[_num_objects].currentFrame = tiles[j] - level.TileSets[tileset_number].FirstGId;
-                        Console.WriteLine(level.TileSets[tileset_number].Columns);
+                        
 
 
                         Tiles[_num_objects].x = (x * 30) + level.Layers[i].offsetx;

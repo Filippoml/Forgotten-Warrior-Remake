@@ -179,6 +179,8 @@ namespace GXPEngine.Classes
                             y = _tile.y - this.height + 10;
                             _colliding = true;
                         }
+
+                        //TODO isn't same condition?
                         if (_screenSection != Convert.ToInt32(Math.Floor(this.x / 810)))
                         {
                             _movingRight = !_movingRight;
@@ -215,10 +217,8 @@ namespace GXPEngine.Classes
                     }
                 }
 
-
-
                 
-                if (_currentState != State.SLEEPING && Math.Floor(this.x / 800) == Math.Floor(_player.x / 800) && _player.y - 2 <= this.y)
+                if (_currentState != State.SLEEPING && Math.Floor((this.x + this.width) / 800) == Math.Floor(_player.x / 800) && Math.Abs(this.y - _player.y) < 60)
                 {
                     //Detect player
                     if (_player.x > this.x && !_mirrorX && _currentState != State.ATTACKING)
@@ -319,7 +319,7 @@ namespace GXPEngine.Classes
 
             if (_counter == (60 / _frameRate))
             {
-
+                /*
                 if (_currentState == State.ATTACKING)
                 {
                     if (_player.x > this.x)
@@ -332,6 +332,7 @@ namespace GXPEngine.Classes
                     }
 
                 }
+                */
 
                 _currentWeapon.SetVisible(false, _mirrorX, -25, 15);
                 

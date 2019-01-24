@@ -135,13 +135,10 @@ namespace GXPEngine.Classes
 
         }
 
-        /// <summary>
-        /// The Update
-        /// </summary>
-        internal void Update()
+        void Update()
         {
-          
 
+            
 
             _counter++;
 
@@ -268,7 +265,7 @@ namespace GXPEngine.Classes
                 {
                     test = false;
                     Random rnd = new Random();
-                    _timer.Interval = rnd.Next(250, 1250);
+                    _timer.Interval = rnd.Next(250, 250);
                     if (_currentState != State.ATTACKING && _colliding)
                     {
 
@@ -302,7 +299,7 @@ namespace GXPEngine.Classes
                                 }
                                 else
                                 {
-                                    _movingRight = false;
+                                    _movingRight = true;
                                 }
                                 break;
 

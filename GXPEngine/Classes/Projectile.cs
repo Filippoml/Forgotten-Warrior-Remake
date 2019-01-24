@@ -28,11 +28,7 @@ namespace GXPEngine.Classes
 
             _speed = 2;
 
-
-
             _player = ((MyGame)game).GetPlayer();
-
-
         }
 
         void Update()

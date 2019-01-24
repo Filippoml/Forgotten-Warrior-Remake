@@ -119,7 +119,14 @@ namespace GXPEngine.Classes
 
         void Update()
         {
-            if ((int)Math.Floor(_player.x / 800) < _scrollIndex)
+            if (Input.GetKeyUp(Key.F)){
+                Translate(-800, 0);
+            }
+            if (Input.GetKeyUp(Key.R))
+            {
+                Translate(800, 0);
+            }
+            if ((int)Math.Floor((_player.x + _player.width) / 800) < _scrollIndex)
             {
                 _scrollIndex = (int)Math.Floor(_player.x / 800);
                 Translate(800, 0);

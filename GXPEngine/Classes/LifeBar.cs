@@ -15,29 +15,13 @@ namespace GXPEngine.Classes
 
         public LifeBar() : base()
         {
-            /*
-            _easyDraw = new EasyDraw(200, 200);
-
-            _easyDraw.NoStroke();
-            _easyDraw.SetOrigin(-7, 20);
-            AddChild(_easyDraw);
-
-            _easyDraw.Fill(Color.Black);
-            _easyDraw.Rect(0, 10, 70, 8);
-
-
-            _easyDraw.Fill(Color.Red);
-            _easyDraw.Rect(17.1f, 10, 33f, 6);
-            
-        */
+          
             
 
             Bitmap Bmp = new Bitmap(100, 100);
             Graphics gfx = Graphics.FromImage(Bmp);
             SolidBrush brush = new SolidBrush(Color.Black);
             gfx.FillRectangle(brush, 0, 0, 100, 100);
-            
-
             _background = new Sprite(Bmp);
             AddChild(_background);
             _background.width = 40;

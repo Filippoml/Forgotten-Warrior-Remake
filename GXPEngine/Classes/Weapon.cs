@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace GXPEngine.Classes
 {
-    class Weapon : AnimationSprite
+    public class Weapon : AnimationSprite
     {
         public Weapon () : base("Data/weapons.png",5,1)
         {
@@ -29,7 +29,6 @@ namespace GXPEngine.Classes
                 {
                     x = mirroredOffset2;
                 }
-            
         }
         public void SetWeapon(int weapon_number)
         {

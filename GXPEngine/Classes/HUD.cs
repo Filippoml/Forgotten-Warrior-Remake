@@ -89,12 +89,7 @@ namespace GXPEngine.Classes
         }
 
         public void Update()
-        {
-            //TODO refresh problem
-            //SetXY(300 + game.width * Convert.ToInt32(Math.Floor(_player.x / 800)), 1170);
-
-
-            
+        {            
             //Updating rectangles witdh based on the player life
             _life1.width = (46 * _player.GetLifePoints()) / 100;
             _life2.width = (46 * _player.GetLifePoints()) / 100;

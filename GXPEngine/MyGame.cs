@@ -16,6 +16,8 @@ public class MyGame : Game
 
     private HUD _hud;
     private Level _level;
+    private Shop _shop;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MyGame"/> class.
     /// </summary>
@@ -46,7 +48,17 @@ public class MyGame : Game
         _hud.SetXY(300, 1170);
         AddChild(_hud);
 
+        _shop = new Shop(175, 650);
         game.Translate(0, -600);
+        _shop.visible = true;
+        AddChild(_shop);
+
+
+    }
+
+    public void ShowShop(bool value)
+    {
+        _shop.visible = value;        
     }
 
     public Player GetPlayer()

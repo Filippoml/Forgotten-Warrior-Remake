@@ -12,11 +12,11 @@ namespace GXPEngine.Classes
         /// <summary>
         /// Defines the frameRate
         /// </summary>
-        private int _frameCounter, _frameRate, _yClimb, _lifePoints, _yClimbdone;
+        private int _frameCounter, _frameRate, _yClimb, _lifePoints, _yClimbdone, _coinsNumber;
 
-        private float _speed, _yVelocity, _stairs_x;
+        private float _speed, _yVelocity, _stairs_x, _hideX;
 
-        private bool _grounding, _canClimb, _attacked;
+        private bool _grounding, _canClimb, _attacked, _canHide, _canBuy;
 
         private Collider _colliderBox;
 
@@ -33,10 +33,12 @@ namespace GXPEngine.Classes
             JUMPING,
             FALLING, 
             ATTACKING,
-            CLIMBING
+            CLIMBING,
+            HIDING
         }
 
         private State _currentState;
+
 
         public Player(float x, float y) : base("Data/player.png", 2, 8)
         {
@@ -50,6 +52,7 @@ namespace GXPEngine.Classes
             _frameRate = 12;
             _speed = 3;
 
+            _coinsNumber = 1;
 
             //Creation Child Objects
             _currentWeapon = new Weapon();
@@ -85,12 +88,13 @@ namespace GXPEngine.Classes
 
 
 
-            keyMovement();
+            keyHandler();
             Animate();
 
             _grounding = false;
             _canClimb = false;
-
+            _canHide = false;
+            _canBuy = false;
 
             checkCollisions();
             checkJumping();
@@ -100,7 +104,8 @@ namespace GXPEngine.Classes
                 _currentState = State.IDLE;
             }
 
-            if (_grounding && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
+            //Maybe I've to add _currentState == State.JUMPING
+            if (_grounding && _currentState == State.FALLING)
             {
                 _currentState = State.IDLE;
             }
@@ -154,10 +159,22 @@ namespace GXPEngine.Classes
                             _grounding = true;
                         }
                     }
+
+                    if(_tile.GetId() == 22)
+                    {
+                        _hideX = _tile.x;
+                        _canHide = true;
+
+                    }
+
+                    if (_tile.GetId() == 34)
+                    {
+                        _canBuy = true;
+                    }
                 }
             }
 
-            Console.WriteLine(_yClimb);
+            
         }
 
         private void Animate()
@@ -228,7 +245,9 @@ namespace GXPEngine.Classes
                         }
                         x = _stairs_x;
                         break;
-
+                    case State.HIDING:
+                        currentFrame = 12;
+                        break;
                 }
 
                 //Damaged effect
@@ -271,9 +290,9 @@ namespace GXPEngine.Classes
             }
         }
 
-        private void keyMovement()
+        private void keyHandler()
         {
-            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING && !Input.GetKey(Key.D))
+            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING && !Input.GetKey(Key.D) && _currentState != State.HIDING)
             {
                 Move(-_speed, 0);
 
@@ -288,7 +307,7 @@ namespace GXPEngine.Classes
                 }
             }
   
-            if (Input.GetKey(Key.D) && _currentState != State.CLIMBING && !Input.GetKey(Key.A))
+            if (Input.GetKey(Key.D) && _currentState != State.CLIMBING && !Input.GetKey(Key.A) && _currentState != State.HIDING)
             {
                 Move(_speed, 0);
                 if (_mirrorX)
@@ -317,25 +336,50 @@ namespace GXPEngine.Classes
                 {
                     _currentState = State.IDLE;
                 }
+                
+
+                if (_canHide)
+                {
+                    this.x = _hideX + 2;
+                    Mirror(false, false);
+                    _currentState = State.HIDING;
+                    if (_canBuy)
+                    {
+                        ((MyGame)game).ShowShop(true);
+
+                    }
+                }
+
+
 
             }
 
             if (Input.GetKey(Key.S) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
-
-                if (_canClimb && _yClimb > 0)
+                if (_currentState == State.HIDING)
                 {
-                    _yClimb--;
-                    _currentState = State.CLIMBING;
-                    y += 1.5f;
+                    _currentState = State.IDLE;
+                    if (_canBuy)
+                    {
+                        ((MyGame)game).ShowShop(false);
+                    }
                 }
                 else
                 {
-                    _currentState = State.IDLE;
-                }
+                    if (_canClimb && _yClimb > 0)
+                    {
+                        _yClimb--;
+                        _currentState = State.CLIMBING;
+                        y += 1.5f;
+                    }
+                    else
+                    {
+                        _currentState = State.IDLE;
+                    }
 
+                }
             }
-            if (Input.GetKey(Key.SPACE) && _grounding && _currentState != State.CLIMBING)
+            if (Input.GetKey(Key.SPACE) && _grounding && _currentState != State.CLIMBING && _currentState != State.HIDING)
             {
                 _currentState = State.JUMPING;
                 _yVelocity = 5;
@@ -371,6 +415,11 @@ namespace GXPEngine.Classes
         public int GetLifePoints()
         {
             return _lifePoints;
+        }
+
+        public int GetCoinsNumber()
+        {
+            return _coinsNumber;
         }
     }
 }

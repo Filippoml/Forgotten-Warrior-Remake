@@ -26,7 +26,7 @@ namespace GXPEngine.Classes
 
         private Sprite _hitSprite;
 
-        private enum State
+        public enum State
         {
             IDLE,
             MOVING,
@@ -52,8 +52,6 @@ namespace GXPEngine.Classes
             _frameRate = 12;
             _speed = 3;
 
-            _coinsNumber = 1;
-
             //Creation Child Objects
             _currentWeapon = new Weapon();
             AddChild(_currentWeapon);
@@ -76,6 +74,7 @@ namespace GXPEngine.Classes
 
         void Update()
         {
+            
             //???
             // TODO: structure this code with a switch case based on state (easier to understand, though it probably introduces some code duplication)
             if (_currentState == State.MOVING && _currentState != State.CLIMBING)
@@ -172,6 +171,13 @@ namespace GXPEngine.Classes
                         _canBuy = true;
                     }
                 }
+                else if (_collisions[i] is Coin)
+                {
+                    Coin _collision = _collisions[i] as Coin;
+                    _coinsNumber += 10;
+                    _collision.Destroy();
+
+                }
             }
 
             
@@ -182,7 +188,7 @@ namespace GXPEngine.Classes
             if (_frameCounter == (60 / _frameRate))
             {
 
-                _currentWeapon.SetVisible(false, false, -10, 10);
+                //_currentWeapon.SetVisible(false, false, -10, 10);
                 switch (_currentState)
                 {
                     case State.IDLE:
@@ -205,7 +211,7 @@ namespace GXPEngine.Classes
                         break;
                     case State.ATTACKING:
                         currentFrame = 4;
-                        _currentWeapon.SetWeapon(0);
+                        _currentWeapon.SetWeapon(1);
                         _currentWeapon.SetVisible(true, _mirrorX, -10, 10);
                         _currentState = State.IDLE;
 
@@ -220,7 +226,7 @@ namespace GXPEngine.Classes
                                 {
 
                                     Swordman _swordman = _collision.getOwner() as Swordman;
-                                    _swordman.Attacked(50);
+                                    _swordman.Attacked(25);
                                     i = _collisions.Length;
 
 
@@ -228,10 +234,12 @@ namespace GXPEngine.Classes
                                 else if (_collision.getOwner().GetType() == typeof(Wizard))
                                 {
                                     Wizard wizard = _collision.getOwner() as Wizard;
-                                    wizard.Attacked(50);
+                                    wizard.Attacked(25);
                                     i = _collisions.Length;
                                 }
+
                             }
+
                         }
                         break;
                     case State.CLIMBING:
@@ -356,28 +364,20 @@ namespace GXPEngine.Classes
 
             if (Input.GetKey(Key.S) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
-                if (_currentState == State.HIDING)
-                {
-                    _currentState = State.IDLE;
-                    if (_canBuy)
-                    {
-                        ((MyGame)game).ShowShop(false);
-                    }
-                }
-                else
-                {
+
+                
                     if (_canClimb && _yClimb > 0)
                     {
                         _yClimb--;
                         _currentState = State.CLIMBING;
                         y += 1.5f;
                     }
-                    else
+                    else if(_currentState != State.HIDING)
                     {
                         _currentState = State.IDLE;
                     }
 
-                }
+                
             }
             if (Input.GetKey(Key.SPACE) && _grounding && _currentState != State.CLIMBING && _currentState != State.HIDING)
             {
@@ -420,6 +420,16 @@ namespace GXPEngine.Classes
         public int GetCoinsNumber()
         {
             return _coinsNumber;
+        }
+
+        public void SetCoinsNumber(int value)
+        {
+            _coinsNumber = value;
+        }
+
+        public void SetState(State state)
+        {
+            _currentState = state;
         }
     }
 }

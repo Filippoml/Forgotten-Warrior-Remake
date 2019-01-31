@@ -16,7 +16,7 @@ namespace GXPEngine.Classes
         /// </summary>
         private bool _colliding = false;
 
-        private float _velocity = 0, _speed = 2;
+        private float _velocity = 0, _speed = 2, _xCanFlip;
 
         private int _counter = 0, _frameRate = 12, _screenSection;
 
@@ -175,7 +175,7 @@ namespace GXPEngine.Classes
                         //Check if player is colliding with ground tiles
                         if (_tile.GetId() >= 1 && _tile.GetId() <= 3)
                         {
-
+                     
                             y = _tile.y - this.height + 10;
                             _colliding = true;
                         }
@@ -193,7 +193,12 @@ namespace GXPEngine.Classes
                             {
                                 _canFlip = false;
                                 _movingRight = !_movingRight;
+                                _xCanFlip = this.x;
                             }
+                        }
+                        else
+                        {
+                            _canFlip = true;
                         }
 
    
@@ -217,11 +222,12 @@ namespace GXPEngine.Classes
                     }
                 }
 
-                
+
+
                 if (_currentState != State.SLEEPING && Math.Floor((this.x + this.width) / 800) == Math.Floor(_player.x / 800) && Math.Abs(this.y - _player.y) < 60)
                 {
                     //Detect player
-                    if (_player.x > this.x && !_mirrorX && _currentState != State.ATTACKING)
+                    if (_player.x > this.x && !_mirrorX)
                     {
 
 
@@ -233,7 +239,7 @@ namespace GXPEngine.Classes
                        
 
                     }
-                    else if (_player.x < this.x && _mirrorX && _currentState != State.ATTACKING)
+                    else if (_player.x < this.x && _mirrorX)
                     {
              
                         _status.SetVisible(true);
@@ -242,7 +248,10 @@ namespace GXPEngine.Classes
 
                         _currentState = State.ATTACKING;
                     }
-
+                    else
+                    {
+                        _currentState = State.IDLE;
+                    }
                 }
                 else
                 {
@@ -261,7 +270,7 @@ namespace GXPEngine.Classes
                 {
                     test = false;
                     Random rnd = new Random();
-                    _timer.Interval = rnd.Next(250, 1250);
+                    _timer.Interval = rnd.Next(1000, 2500);
                     if (_currentState != State.ATTACKING && _colliding)
                     {
 
@@ -288,7 +297,7 @@ namespace GXPEngine.Classes
                             case 3:
                                 _currentState = State.MOVING;
                                 int _direction = rnd.Next(0, 2);
-                                _canFlip = true;
+
                                 if (_direction == 1)
                                 {
                                     _movingRight = true;

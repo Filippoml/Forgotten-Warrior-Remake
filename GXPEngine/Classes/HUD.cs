@@ -16,7 +16,9 @@ namespace GXPEngine.Classes
 
         private Font _font;
 
-        private EasyDraw _easyDraw; 
+        private EasyDraw _easyDraw;
+
+        private int _health_potion_number, _mana_potion_number;
 
         public HUD()
         {
@@ -81,11 +83,7 @@ namespace GXPEngine.Classes
             pfc.AddFontFile("Data/LCD Solid.ttf");
             _font = new Font(new FontFamily(pfc.Families[0].Name), 10, FontStyle.Regular);
 
-            //Life potions number
-            _easyDraw.graphics.DrawString("0", _font, new SolidBrush(Color.White), new PointF(17, 12));
-
-            //Mana potions number
-            _easyDraw.graphics.DrawString("0", _font, new SolidBrush(Color.White), new PointF(45, 12));
+            updateHUD();
         }
 
         public void Update()
@@ -93,6 +91,41 @@ namespace GXPEngine.Classes
             //Updating rectangles witdh based on the player life
             _life1.width = (46 * _player.GetLifePoints()) / 100;
             _life2.width = (46 * _player.GetLifePoints()) / 100;
+
+            
+        }
+
+        public void IncrementHealthPotionsNumber()
+        {
+            _health_potion_number++;
+            updateHUD();
+        }
+
+        public void IncrementManaPotionsNumber()
+        {
+            _mana_potion_number++;
+            updateHUD();
+        }
+
+        public int GetHealthPotionsNumber()
+        {
+            return _health_potion_number;
+        }
+
+        public int GetManaPotionsNumber()
+        {
+           return _mana_potion_number;
+        }
+
+        private void updateHUD()
+        {
+            _easyDraw.Clear(Color.Transparent);
+
+            //Life potions number
+            _easyDraw.graphics.DrawString(_health_potion_number.ToString(), _font, new SolidBrush(Color.White), new PointF(17, 12));
+
+            //Mana potions number
+            _easyDraw.graphics.DrawString(_mana_potion_number.ToString(), _font, new SolidBrush(Color.White), new PointF(45, 12));
         }
     }
 }

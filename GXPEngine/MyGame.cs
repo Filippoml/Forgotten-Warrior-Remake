@@ -50,10 +50,15 @@ public class MyGame : Game
 
         _shop = new Shop(175, 650);
         game.Translate(0, -600);
-        _shop.visible = true;
+        _shop.visible = false;
         AddChild(_shop);
 
 
+    }
+
+    public HUD GetHud()
+    {
+        return _hud;
     }
 
     public void ShowShop(bool value)

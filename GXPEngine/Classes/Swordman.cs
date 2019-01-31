@@ -14,7 +14,7 @@ namespace GXPEngine.Classes
         /// </summary>
         private bool _colliding = false;
 
-        private float _velocity = 0, _speed = 2;
+        private float _velocity = 0, _speed = 2, _xCanFlip;
 
         private int _counter = 0, _frameRate = 12, _screenSection;
 
@@ -144,7 +144,6 @@ namespace GXPEngine.Classes
 
             _colliding = false;
 
-
             if (_currentState != State.DYING)
             {
                 GameObject[] collisions = _colliderBox.GetCollisions();
@@ -169,12 +168,16 @@ namespace GXPEngine.Classes
 
                         if (_tile.GetId() == 1 || _tile.GetId() == 3 || _screenSection != Convert.ToInt32(Math.Floor(this.x / 810)))
                         {
-
                             if (_canFlip)
                             {
                                 _canFlip = false;
                                 _movingRight = !_movingRight;
+                                _xCanFlip = this.x;
                             }
+                        }
+                        else
+                        {
+                            _canFlip = true;
                         }
 
                         if (_currentState == State.ATTACKING)
@@ -265,7 +268,7 @@ namespace GXPEngine.Classes
                 {
                     test = false;
                     Random rnd = new Random();
-                    _timer.Interval = rnd.Next(250, 250);
+                    _timer.Interval = rnd.Next(1000, 2500);
                     if (_currentState != State.ATTACKING && _colliding)
                     {
 
@@ -292,14 +295,13 @@ namespace GXPEngine.Classes
                             case 3:
                                 _currentState = State.MOVING;
                                 int _direction = rnd.Next(0, 2);
-                                _canFlip = true;
                                 if (_direction == 1)
                                 {
                                     _movingRight = true;
                                 }
                                 else
                                 {
-                                    _movingRight = true;
+                                    _movingRight = false;
                                 }
                                 break;
 

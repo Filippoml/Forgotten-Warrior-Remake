@@ -58,6 +58,18 @@ namespace GXPEngine.Classes
                 int columns = level.Layers[i].Width;
                 int rows = level.Layers[i].Height;
 
+                int tileset_number;
+
+                if (i == 3)
+                {
+                    tileset_number = 1;
+                }
+                else
+                {
+                    tileset_number = 0;
+                }
+
+
                 for (int j = 0; j < tiles.Length; j++)
                 {
 
@@ -67,15 +79,9 @@ namespace GXPEngine.Classes
                         int x = j % columns;
                         int y = j / columns;
 
-                        int tileset_number;
-                        if (i == 2)
-                        {
-                            tileset_number = 1;
-                        }
-                        else
-                        {
-                            tileset_number = 0;
-                        }
+
+
+                        Console.WriteLine(i);
 
                         Tiles[_num_objects] = new Tile(tiles[j], level.TileSets[tileset_number].Image.FileName, level.TileSets[tileset_number].Columns, level.TileSets[tileset_number].Rows);
                         Tiles[_num_objects].currentFrame = tiles[j] - level.TileSets[tileset_number].FirstGId;
@@ -91,12 +97,12 @@ namespace GXPEngine.Classes
                 }
             }
 
-            _player = new Player(100, 1000);
+            _player = new Player(25, 1000);
 
             for (int i = 0; i < level.ObjectGroups[0].Objects.Length; i++)
             {
                 TiledObject _object = level.ObjectGroups[0].Objects[i];
-
+                
                 switch (_object.Type)
                 {
                     case "Swordman":
@@ -111,7 +117,12 @@ namespace GXPEngine.Classes
                         Wizard wizard = new Wizard(_object.X, _object.Y);
                         AddChild(wizard);
                         break;
+                    case "Coin":
+                        Coin _coin = new Coin(_object.X , _object.Y);
+                        AddChild(_coin);
+                        break;
                 }
+                
             }
 
             AddChild(_player);

@@ -16,13 +16,15 @@ namespace GXPEngine.Classes
 
         private Items _items;
 
-        private int _indexItems, _indexModeTemp, _indexMode;
+        private int _indexItems, _indexMode;
 
         private EasyDraw _easyDraw;
 
         private Font _font;
 
         private Player _player;
+
+        private HUD _hud;
 
         public Shop(float x, float y) : base("Data/shop.png")
         {
@@ -32,6 +34,7 @@ namespace GXPEngine.Classes
 
 
             _player = ((MyGame)game).GetPlayer();
+            _hud = ((MyGame)game).GetHud();
 
             Bitmap Bmp = new Bitmap(100, 100);
             Graphics gfx = Graphics.FromImage(Bmp);
@@ -47,6 +50,8 @@ namespace GXPEngine.Classes
             _shop_rect = new Sprite("Data/shop_rect.png");
             _shop_rect.SetXY(164, 46);
             AddChild(_shop_rect);
+
+
 
             for (int i = 0; i < 5; i++)
             {                
@@ -79,15 +84,7 @@ namespace GXPEngine.Classes
             pfc.AddFontFile("Data/LCD Solid.ttf");
             _font = new Font(new FontFamily(pfc.Families[0].Name), 10, FontStyle.Regular);
 
-            Item _item = _items.Item[4];
-
-
-            _easyDraw.graphics.DrawString(_item.Value, _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
-            _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
-
-            //_easyDraw.graphics.DrawString("HEALING:(" + _item.Value + "%)", _font, new SolidBrush(Color.White), new PointF(60, 200));
-            //_easyDraw.graphics.DrawString("DAMAGE:" + _item.Damage, _font, new SolidBrush(Color.White), new PointF(36, 200));
-            //_easyDraw.graphics.DrawString("RANGE:" + _item.Range, _font, new SolidBrush(Color.White), new PointF(125, 200));
+            _easyDraw.graphics.DrawString("WELCOME", _font, new SolidBrush(Color.White), new PointF(80, 200));
         }
         void Update()   
         {
@@ -135,8 +132,16 @@ namespace GXPEngine.Classes
                 if (_shop_rect.y > 46)
                 {
                     _shop_rect.y -= 18;
-                    _indexModeTemp--;
+                    _indexMode--;
+
+
+
                 }
+                Item _item = _items.Item[4];
+
+
+                _easyDraw.graphics.DrawString(_item.Value, _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
+                _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
 
             }
             else if (Input.GetKeyDown(Key.S))
@@ -144,16 +149,53 @@ namespace GXPEngine.Classes
                 if(_shop_rect.y < 82)
                 {
                     _shop_rect.y += 18;
-                    _indexModeTemp++;
+                    _indexMode++;
                 }
             }
             else if (Input.GetKeyDown(Key.ENTER))
             {
-                _indexMode = _indexModeTemp;
+               
                 Item _item = _items.Item[_indexItems];
-                switch(_indexModeTemp)
+                switch(_indexMode)
                 {
                     case 0:
+                        if (_player.GetCoinsNumber() >= _item.Cost)
+                        {
+                            _player.SetCoinsNumber(_player.GetCoinsNumber() - _item.Cost);
+                            _easyDraw.Clear(Color.Transparent);
+                            _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
+                            _easyDraw.graphics.DrawString(_item.Cost.ToString(), _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
+
+                            switch (_indexItems)
+                            {
+                                case 3:
+                                    if (_hud.GetHealthPotionsNumber() < 9)
+                                    {
+
+                                            _hud.IncrementHealthPotionsNumber();
+
+                                         
+                                           
+                                    }
+
+                                    break;
+                                case 4:
+                                    if (_hud.GetManaPotionsNumber() < 9)
+                                    {
+
+                                            _hud.IncrementManaPotionsNumber();
+                                            
+                                        
+                                    }
+
+                                    break;
+                            }
+
+                        }
+                        else
+                        {
+                            _easyDraw.graphics.DrawString("NO ENOUGH MONEY", _font, new SolidBrush(Color.White), new PointF(55, 200));
+                        }
                         break;
 
                     case 1:
@@ -162,7 +204,7 @@ namespace GXPEngine.Classes
                             case "weapon":
                                 _easyDraw.graphics.DrawString("DAMAGE:" + _item.Damage, _font, new SolidBrush(Color.White), new PointF(36, 200));
                                 _easyDraw.graphics.DrawString("RANGE:" + _item.Range, _font, new SolidBrush(Color.White), new PointF(125, 200));
-                                Console.WriteLine(_item.Value);
+                                
                                 break;
                             case "potion":
                                 _easyDraw.graphics.DrawString("HEALING:(" + _item.Value + "%)", _font, new SolidBrush(Color.White), new PointF(60, 200));
@@ -171,12 +213,16 @@ namespace GXPEngine.Classes
                         break;
 
                     case 2:
+                        visible = false;
+                        _player.SetState(Player.State.IDLE);
+                       
                         break;
                 }
 
             }
 
-            Console.WriteLine(_indexModeTemp);
+
+
             
         }
 

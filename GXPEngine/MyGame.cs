@@ -40,7 +40,7 @@ public class MyGame : Game
         _background.height = 5000;
 
         _level = new Level(1);
-        _level.generateLevel();
+        _level.generateLevel(0);
         AddChild(_level);
 
 

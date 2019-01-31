@@ -112,7 +112,7 @@ namespace GXPEngine.Classes
             applyGravity();
 
             //Respawn: just for testing
-            if (y > 1100)
+            if (y > 1300)
             {
                 x = 100;
                 y = 1000;
@@ -179,8 +179,6 @@ namespace GXPEngine.Classes
 
                 }
             }
-
-            
         }
 
         private void Animate()

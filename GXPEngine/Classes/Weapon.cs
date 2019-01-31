@@ -59,19 +59,13 @@ namespace GXPEngine.Classes
             }
             else if(x > 0 && visible && !_mirrorX)
             {
- 
-
-                    x -= _xVelocity;
-   
+                x -= _xVelocity;
                 _returning = true;
-
-
             }
             else if(x < 0 && visible && _mirrorX)
             {
                 x += _xVelocity;
                 _returning = true;
-
             }
             else
             {

@@ -18,6 +18,12 @@ public class MyGame : Game
     private Level _level;
     private Shop _shop;
 
+    private bool _paused;
+
+    private float _slideVelocity;
+
+    private Sprite _background2, _background3;
+
     /// <summary>
     /// Initializes a new instance of the <see cref="MyGame"/> class.
     /// </summary>
@@ -28,11 +34,9 @@ public class MyGame : Game
         
         //Background creation
         Bitmap Bmp = new Bitmap(width, height);
-        using (Graphics gfx = Graphics.FromImage(Bmp))
-        using (SolidBrush brush = new SolidBrush(Color.FromArgb(135, 206, 235)))
-        {
-            gfx.FillRectangle(brush, 0, 0, width, height);
-        }
+        Graphics gfx = Graphics.FromImage(Bmp);
+        SolidBrush brush = new SolidBrush(Color.FromArgb(135, 206, 235));
+        gfx.FillRectangle(brush, 0, 0, width, height);
 
         Sprite _background = new Sprite(Bmp);
         AddChild(_background);
@@ -40,7 +44,7 @@ public class MyGame : Game
         _background.height = 5000;
 
         _level = new Level(1);
-        _level.generateLevel(0);
+        _level.generateLevel();
         AddChild(_level);
 
 
@@ -53,7 +57,37 @@ public class MyGame : Game
         _shop.visible = false;
         AddChild(_shop);
 
+        _level.GetPlayer().LoadHUD();
 
+
+        Bmp = new Bitmap(800, 200);
+        gfx = Graphics.FromImage(Bmp);
+        brush = new SolidBrush(Color.Black);
+        gfx.FillRectangle(brush, 0, 0, 800, 200);
+
+
+        _background2 = new Sprite(Bmp);
+        _background2.y = 400;
+        AddChild(_background2);
+
+
+
+        _background3 = new Sprite(Bmp);
+        _background3.y = 1200;
+
+        AddChild(_background3);
+
+        _slideVelocity = 1;
+    }
+
+    public void SetPaused(bool value)
+    {
+        _paused = value;
+    }
+
+    public bool IsPaused()
+    {
+        return _paused;
     }
 
     public HUD GetHud()
@@ -81,7 +115,29 @@ public class MyGame : Game
     /// </summary>
     void Update()
     {
-        _hud.Update();
+        Console.WriteLine(_background2.y);
+        if((_background2.y + _slideVelocity + 1) < 600)
+        {
+            _slideVelocity += 0.1f;
+            _background2.y += _slideVelocity;
+
+            _background3.y -= _slideVelocity;
+        }
+        else
+        {
+            Sprite _game = new Sprite("Data/game.png");
+            _game.y = 800;
+            _game.x = (width/2) - (_game.width/2);
+            AddChild(_game);
+
+            Sprite _over = new Sprite("Data/over.png");
+            _over.y = 830;
+            _over.x = (width / 2) - (_over.width / 2) + 5;
+            AddChild(_over);
+
+            _paused = true;
+        }
+
     }
 
     /// <summary>

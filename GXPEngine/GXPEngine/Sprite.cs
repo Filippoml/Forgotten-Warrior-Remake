@@ -95,7 +95,8 @@ namespace GXPEngine
 		/// </summary>
 		public Texture2D texture {
 			get { return _texture; }
-		}
+            set { _texture = value; }
+        }
 		
 		//------------------------------------------------------------------------------------------------------------------------
 		//														width

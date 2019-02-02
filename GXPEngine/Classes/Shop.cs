@@ -88,9 +88,12 @@ namespace GXPEngine.Classes
         }
         void Update()   
         {
-            if(visible)
+            if (!((MyGame)game).IsPaused())
             {
-                keyHandler();
+                if (visible)
+                {
+                    keyHandler();
+                }
             }
         }
 
@@ -161,7 +164,7 @@ namespace GXPEngine.Classes
                     case 0:
                         if (_player.GetCoinsNumber() >= _item.Cost)
                         {
-                            _player.SetCoinsNumber(_player.GetCoinsNumber() - _item.Cost);
+                            _player.SetCoinsNumber(false, _item.Cost);
                             _easyDraw.Clear(Color.Transparent);
                             _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
                             _easyDraw.graphics.DrawString(_item.Cost.ToString(), _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
@@ -169,25 +172,10 @@ namespace GXPEngine.Classes
                             switch (_indexItems)
                             {
                                 case 3:
-                                    if (_hud.GetHealthPotionsNumber() < 9)
-                                    {
-
-                                            _hud.IncrementHealthPotionsNumber();
-
-                                         
-                                           
-                                    }
-
+                                    _hud.SetHealthPotionsNumber(true);
                                     break;
                                 case 4:
-                                    if (_hud.GetManaPotionsNumber() < 9)
-                                    {
-
-                                            _hud.IncrementManaPotionsNumber();
-                                            
-                                        
-                                    }
-
+                                    _hud.SetManaPotionsNumber(true);                                
                                     break;
                             }
 

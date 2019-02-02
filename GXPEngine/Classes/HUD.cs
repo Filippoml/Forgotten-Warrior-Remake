@@ -20,6 +20,8 @@ namespace GXPEngine.Classes
 
         private int _health_potion_number, _mana_potion_number;
 
+        private Sprite [] _notchArray;
+
         public HUD()
         {
 
@@ -39,8 +41,8 @@ namespace GXPEngine.Classes
             _life1.height = 3;
             AddChild(_life1);
 
+            _notchArray = new Sprite[3];
 
-            
             brush = new SolidBrush(System.Drawing.ColorTranslator.FromHtml("#E70052"));
             gfx.FillRectangle(brush, 0, 0, 100, 100);
             _life2 = new Sprite(Bmp);
@@ -68,11 +70,15 @@ namespace GXPEngine.Classes
             _mana2.width = 56;
             _mana2.height = 3;
             AddChild(_mana2);
-            
-            for (int i = 0; i< 3; i++)
+
+
+
+           
+            for (int i = 0; i < (_player.GetManaPoints()*3) / 100; i++)
             {
                 Sprite notch = new Sprite("Data/notch.png");
                 notch.SetXY(189 + 19 * i, 9);
+                _notchArray[i] = notch;
                 AddChild(notch);
             }
 
@@ -84,27 +90,53 @@ namespace GXPEngine.Classes
             _font = new Font(new FontFamily(pfc.Families[0].Name), 10, FontStyle.Regular);
 
             updateHUD();
+
+
         }
 
-        public void Update()
-        {            
+        void Update()
+        {
+
             //Updating rectangles witdh based on the player life
             _life1.width = (46 * _player.GetLifePoints()) / 100;
             _life2.width = (46 * _player.GetLifePoints()) / 100;
 
-            
+            _mana1.width = (56 * _player.GetManaPoints()) / 100;
+            _mana2.width = (56 * _player.GetManaPoints()) / 100;
         }
 
-        public void IncrementHealthPotionsNumber()
+        public void SetHealthPotionsNumber(bool increment)
         {
-            _health_potion_number++;
-            updateHUD();
+            if ((_health_potion_number > 0 && !increment) || (_health_potion_number < 10 && increment))
+            {
+                if (increment)
+                {
+                    _health_potion_number++;
+                }
+                else
+                {
+                    _health_potion_number--;
+                }
+
+                updateHUD();
+            }
         }
 
-        public void IncrementManaPotionsNumber()
+        public void SetManaPotionsNumber(bool increment)
         {
-            _mana_potion_number++;
-            updateHUD();
+            if ((_mana_potion_number > 0 && !increment) || (_mana_potion_number < 10 && increment))
+            {
+                if (increment)
+                {
+                    _mana_potion_number++;
+                }
+                else
+                {
+                    _mana_potion_number--;
+                }
+
+                updateHUD();
+            }
         }
 
         public int GetHealthPotionsNumber()
@@ -114,7 +146,7 @@ namespace GXPEngine.Classes
 
         public int GetManaPotionsNumber()
         {
-           return _mana_potion_number;
+            return _mana_potion_number;
         }
 
         private void updateHUD()
@@ -126,6 +158,25 @@ namespace GXPEngine.Classes
 
             //Mana potions number
             _easyDraw.graphics.DrawString(_mana_potion_number.ToString(), _font, new SolidBrush(Color.White), new PointF(45, 12));
+
+            for(int i = 0; i < _notchArray.Length; i++)
+            {
+                if (_notchArray[i] != null)
+                {
+                    _notchArray[i].Destroy();
+                }
+            }
+
+            for (int i = 0; i < (_player.GetManaPoints() * 3) / 100; i++)
+            {
+                Sprite notch = new Sprite("Data/notch.png");
+                notch.SetXY(189 + 19 * i, 9);
+                _notchArray[i] = notch;
+                AddChild(notch);
+            }
         }
+
+
+
     }
 }

@@ -8,17 +8,17 @@ namespace GXPEngine.Classes
 {
     public class Weapon : AnimationSprite
     {
-        private int _range = 2;
+        private int _range = 4;
 
-        private float _xVelocity = 2;
+        private float _xVelocity = 2, _startX;
 
         private bool _returning = false;
         public Weapon () : base("Data/weapons.png",5,1)
         {
+           
             y = 15;
             visible = false;
-            currentFrame = 0;
-
+  
         }
 
         public void SetVisible(bool value, bool mirrored, int mirroredOffset1, int mirroredOffset2)
@@ -34,6 +34,7 @@ namespace GXPEngine.Classes
                 {
                    x = mirroredOffset2;
                 }
+            _startX = x;
         }
         public void SetWeapon(int weapon_number)
         {
@@ -42,39 +43,55 @@ namespace GXPEngine.Classes
 
         void Update()
         {
-
-            if(Math.Abs(x) < _range * 20 && !_returning && visible)
+            if (!((MyGame)game).IsPaused())
             {
-                _xVelocity += 0.5f;
-                if (_mirrorX)
+                if (currentFrame != 0)
                 {
-                    x -= _xVelocity;
-                }
-                else
-                {
-                    x += _xVelocity;
-                }
-          
-                _returning = false;
-            }
-            else if(x > 0 && visible && !_mirrorX)
-            {
-                x -= _xVelocity;
-                _returning = true;
-            }
-            else if(x < 0 && visible && _mirrorX)
-            {
-                x += _xVelocity;
-                _returning = true;
-            }
-            else
-            {
-                _xVelocity = 1;
-                _returning = false;
-                visible = false;
+                    if (Math.Abs(x) < _range * 20 && !_returning && visible)
+                    {
+                        _xVelocity += 0.2f;
+                        if (_mirrorX)
+                        {
+                            x -= _xVelocity;
+                        }
+                        else
+                        {
+                            x += _xVelocity;
+                        }
 
-            }
+                        _returning = false;
 
+                    }
+                    else if (x > _startX && visible && !_mirrorX)
+                    {
+
+
+                        x -= _xVelocity;
+
+                        _returning = true;
+
+
+                    }
+                    else if (x < _startX && visible && _mirrorX)
+                    {
+                        x += _xVelocity;
+                        _returning = true;
+
+                    }
+                    else
+                    {
+                        _xVelocity = 2;
+                        _returning = false;
+                        visible = false;
+                    }
+                }
+            }
+        }
+
+        public void SetReturing()
+        {
+            _returning = true;
+        
         }
 
     }

@@ -33,35 +33,38 @@ namespace GXPEngine.Classes
 
         void Update()
         {
-            if (_hasToMoveRight)
+            if (!((MyGame)game).IsPaused())
             {
-                x += _speed;
-            }
-            else
-            {
-                x -= _speed;
-            }
 
-   
-
-            if(_screenSection != Convert.ToInt32(Math.Floor(this.x / 780)))
-            {
-                this.Destroy();
-            }
-
-            GameObject [] collisions = GetCollisions();
-            for (int i = 0; i < collisions.Length; i++)
-            {
-                if (collisions[i] is Collider)
+                if (_hasToMoveRight)
                 {
-                    if (collisions[i] == _player.getCollider())
+                    x += _speed;
+                }
+                else
+                {
+                    x -= _speed;
+                }
+
+
+
+                if (_screenSection != Convert.ToInt32(Math.Floor(this.x / 780)))
+                {
+                    this.Destroy();
+                }
+
+                GameObject[] collisions = GetCollisions();
+                for (int i = 0; i < collisions.Length; i++)
+                {
+                    if (collisions[i] is Collider)
                     {
-                        _player.Attacked(10);
-                        this.Destroy();
+                        if (collisions[i] == _player.getCollider())
+                        {
+                            _player.Attacked(10);
+                            this.Destroy();
+                        }
                     }
                 }
             }
-
 
         }
     }

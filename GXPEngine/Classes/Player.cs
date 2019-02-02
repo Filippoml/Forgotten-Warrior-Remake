@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.IO;
+using System.Xml.Serialization;
+using GXPEngine.Core;
 using GXPEngine.GXPEngine;
 
 namespace GXPEngine.Classes
@@ -12,7 +15,7 @@ namespace GXPEngine.Classes
         /// <summary>
         /// Defines the frameRate
         /// </summary>
-        private int _frameCounter, _frameRate, _yClimb, _lifePoints, _yClimbdone, _coinsNumber;
+        private int _frameCounter, _frameRate, _yClimb, _lifePoints, _manaPoints, _yClimbdone, _coinsNumber; 
 
         private float _speed, _yVelocity, _stairs_x, _hideX;
 
@@ -24,7 +27,11 @@ namespace GXPEngine.Classes
 
         GameObject[] _collisions;
 
-        private Sprite _hitSprite;
+        private Sprite _hitSprite, _redCircle;
+
+        private HUD _hud;
+
+        private Items _items;
 
         public enum State
         {
@@ -48,12 +55,14 @@ namespace GXPEngine.Classes
             //Init
             SetScaleXY(1.2f);
             currentFrame = 0;
-            _lifePoints = 100;
+            _lifePoints = 50;
+            _manaPoints = 50;
             _frameRate = 12;
             _speed = 3;
 
             //Creation Child Objects
             _currentWeapon = new Weapon();
+            _currentWeapon.SetWeapon(1);
             AddChild(_currentWeapon);
 
             _colliderBox = new Collider("Data/HitBox.png", this);
@@ -66,7 +75,21 @@ namespace GXPEngine.Classes
             _hitSprite.SetXY(15, 15);
             AddChild(_hitSprite);
 
+            _redCircle = new Sprite("Data/red_circle.png");
+            _redCircle.visible = false;
+            _redCircle.x = 2;
+            _redCircle.y = height - (_redCircle.height * 2);
+            AddChild(_redCircle);
+
             _yClimbdone = 110;
+
+            string path = "Data/Items.xml";
+
+            XmlSerializer serializer = new XmlSerializer(typeof(Items));
+
+            StreamReader reader = new StreamReader(path);
+            _items = (Items)serializer.Deserialize(reader);
+            reader.Close();
         }
 
 
@@ -74,49 +97,61 @@ namespace GXPEngine.Classes
 
         void Update()
         {
-            
-            //???
-            // TODO: structure this code with a switch case based on state (easier to understand, though it probably introduces some code duplication)
-            if (_currentState == State.MOVING && _currentState != State.CLIMBING)
+            if (!((MyGame)game).IsPaused())
             {
 
-                _currentState = State.IDLE;
-            }
+                if (_redCircle.y >= 0 && _redCircle.visible)
+                {
+                    _redCircle.y--;
+                }
+                else
+                {
+                    _redCircle.visible = false;
+                }
 
-            _frameCounter++;
+                //???
+                // TODO: structure this code with a switch case based on state (easier to understand, though it probably introduces some code duplication)
+                if (_currentState == State.MOVING && _currentState != State.CLIMBING)
+                {
+
+                    _currentState = State.IDLE;
+                }
+
+                _frameCounter++;
 
 
 
-            keyHandler();
-            Animate();
+                keyHandler();
+                Animate();
 
-            _grounding = false;
-            _canClimb = false;
-            _canHide = false;
-            _canBuy = false;
+                _grounding = false;
+                _canClimb = false;
+                _canHide = false;
+                _canBuy = false;
 
-            checkCollisions();
-            checkJumping();
+                checkCollisions();
+                checkJumping();
 
-            if (_yVelocity < 0 && _currentState == State.JUMPING)
-            {
-                _currentState = State.IDLE;
-            }
+                if (_yVelocity < 0 && _currentState == State.JUMPING)
+                {
+                    _currentState = State.IDLE;
+                }
 
-            //Maybe I've to add _currentState == State.JUMPING
-            if (_grounding && _currentState == State.FALLING)
-            {
-                _currentState = State.IDLE;
-            }
+                //Maybe I've to add _currentState == State.JUMPING
+                if (_grounding && _currentState == State.FALLING)
+                {
+                    _currentState = State.IDLE;
+                }
 
-            applyGravity();
+                applyGravity();
 
-            //Respawn: just for testing
-            if (y > 1300)
-            {
-                x = 100;
-                y = 1000;
-                _yVelocity = 0;
+                //Respawn: just for testing
+                if (y > 1500)
+                {
+                    x = 100;
+                    y = 1000;
+                    _yVelocity = 0;
+                }
             }
 
         }
@@ -150,11 +185,11 @@ namespace GXPEngine.Classes
                     //Check if player is colliding with ground tiles
                     if (_tile.GetId() >= 1 && _tile.GetId() <= 3 && _currentState != State.JUMPING && _currentState != State.CLIMBING)
                     {
-                        float old_y = y - (_tile.y - height + 9);
+                        float old_y = y - (_tile.y - height + 12);
 
                         if (old_y < 10)
                         {
-                            y = _tile.y - height + 9;
+                            y = _tile.y - height + 12;
                             _grounding = true;
                         }
                     }
@@ -179,10 +214,43 @@ namespace GXPEngine.Classes
 
                 }
             }
+
+            
         }
 
         private void Animate()
         {
+            /*
+            if(_currentState == State.ATTACKING)
+            {
+                _collisions = _currentWeapon.GetCollisions();
+                for (int i = 0; i < _collisions.Length; i++)
+                {
+                    if (_collisions[i] is Collider)
+                    {
+
+                        Collider _collision = _collisions[i] as Collider;
+
+                        if (_collision.getOwner().GetType() == typeof(Swordman))
+                        {
+                            Console.WriteLine("rsda");
+                            Swordman _swordman = _collision.getOwner() as Swordman;
+                            _swordman.Attacked(0);
+                            i = _collisions.Length;
+                        }
+                        else if (_collision.getOwner().GetType() == typeof(Wizard))
+                        {
+                            Wizard wizard = _collision.getOwner() as Wizard;
+                            wizard.Attacked(25);
+                            i = _collisions.Length;
+                        }
+
+                    }
+
+                }
+            }
+            */
+
             if (_frameCounter == (60 / _frameRate))
             {
 
@@ -209,25 +277,28 @@ namespace GXPEngine.Classes
                         break;
                     case State.ATTACKING:
                         currentFrame = 4;
-                        _currentWeapon.SetWeapon(1);
-                        _currentWeapon.SetVisible(true, _mirrorX, -10, 10);
-                        _currentState = State.IDLE;
 
+                        if (!(_currentWeapon.visible))
+                        {
+                            _currentWeapon.SetOrigin(-12, 0);
+                            _currentWeapon.SetVisible(true, _mirrorX, -30, 30);
+                        }
+                        _currentState = State.IDLE;
+                        
                         _collisions = _currentWeapon.GetCollisions();
                         for (int i = 0; i < _collisions.Length; i++)
                         {
                             if (_collisions[i] is Collider)
                             {
+                                
                                 Collider _collision = _collisions[i] as Collider;
-
+                              
                                 if (_collision.getOwner().GetType() == typeof(Swordman))
                                 {
-
+                                    
                                     Swordman _swordman = _collision.getOwner() as Swordman;
-                                    _swordman.Attacked(25);
+                                    _swordman.Attacked(0);
                                     i = _collisions.Length;
-
-
                                 }
                                 else if (_collision.getOwner().GetType() == typeof(Wizard))
                                 {
@@ -362,20 +433,16 @@ namespace GXPEngine.Classes
 
             if (Input.GetKey(Key.S) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
-
-                
                     if (_canClimb && _yClimb > 0)
                     {
                         _yClimb--;
                         _currentState = State.CLIMBING;
                         y += 1.5f;
                     }
-                    else if(_currentState != State.HIDING)
+                    else if(!_canBuy)
                     {
                         _currentState = State.IDLE;
                     }
-
-                
             }
             if (Input.GetKey(Key.SPACE) && _grounding && _currentState != State.CLIMBING && _currentState != State.HIDING)
             {
@@ -386,6 +453,33 @@ namespace GXPEngine.Classes
             if (Input.GetMouseButtonDown(0) && (_currentState == State.IDLE || _currentState == State.MOVING) && _currentState != State.ATTACKING && _currentState != State.CLIMBING)
             {
                 _currentState = State.ATTACKING;
+            }
+
+            if(Input.GetKeyDown(Key.ONE))
+            {
+                if (_lifePoints < 100)
+                {
+                    int _healthPotionValue = Convert.ToInt32(_items.Item[3].Value);
+                    incrementLife(_healthPotionValue);
+                    _hud.SetHealthPotionsNumber(false);
+                }
+            }
+
+            if (Input.GetKeyDown(Key.TWO))
+            {
+                if (_manaPoints < 100)
+                {
+                    int _manaPotionValue = Convert.ToInt32(_items.Item[4].Value);
+                    incrementMana(_manaPotionValue);
+                    _hud.SetManaPotionsNumber(false);
+                }
+            }
+
+            if (Input.GetKeyDown(Key.THREE))
+            {
+                int _manaPotionValue = -20;
+                incrementMana(_manaPotionValue);
+                _hud.SetManaPotionsNumber(false);
             }
         }
 
@@ -410,9 +504,57 @@ namespace GXPEngine.Classes
             _attacked = true;
         }
 
+        private void incrementLife(int value)
+        {
+            if (_hud.GetHealthPotionsNumber() > 0)
+            {
+                if (_lifePoints + value > 100)
+                {
+                    _lifePoints = 100;
+                }
+                else
+                {
+                    _lifePoints += value;
+                }
+                _redCircle.y = height - (_redCircle.height * 2);
+
+                _redCircle.texture = new Texture2D("Data/red_circle.png");
+                _redCircle.visible = true;
+
+
+            }
+
+
+        }
+        
+        private void incrementMana(int value)
+        {
+            if (_hud.GetManaPotionsNumber() > 0)
+            {
+                if (_manaPoints + value > 100)
+                {
+                    _manaPoints = 100;
+                }
+                else
+                {
+                    _manaPoints += value;
+                }
+                _redCircle.y = height - (_redCircle.height * 2);
+
+                _redCircle.texture = new Texture2D("Data/blue_circle.png");
+                _redCircle.visible = true;
+
+            }
+        }
+
         public int GetLifePoints()
         {
             return _lifePoints;
+        }
+
+        public int GetManaPoints()
+        {
+            return _manaPoints;
         }
 
         public int GetCoinsNumber()
@@ -420,14 +562,48 @@ namespace GXPEngine.Classes
             return _coinsNumber;
         }
 
-        public void SetCoinsNumber(int value)
+        public void SetCoinsNumber(bool add, int value)
         {
-            _coinsNumber = value;
+            if(add)
+            {
+                _coinsNumber += value;
+            }
+            else
+            {
+                _coinsNumber -= value;
+            }
+
         }
 
         public void SetState(State state)
         {
             _currentState = state;
         }
+
+        public Weapon GetWeapon()
+        {
+            return _currentWeapon;
+        }
+
+        public State GetState()
+        {
+            return _currentState;
+        }
+
+        public void LoadHUD()
+        {
+            _hud = ((MyGame)game).GetHud();
+        }
+
+        public void SetHealthPotionsNumber(bool increment)
+        {
+            _hud.SetHealthPotionsNumber(increment);
+        }
+
+        public void SetManaPotionsNumber(bool increment)
+        {
+            _hud.SetManaPotionsNumber(increment);
+        }
+
     }
 }

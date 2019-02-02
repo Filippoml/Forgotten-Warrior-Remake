@@ -26,7 +26,7 @@ namespace GXPEngine.Classes
 
             //Init
             _frameRate = 12;
-            _speed = 2.5f;
+            _speed = 5.5f;
 
             _player = ((MyGame)game).GetPlayer();
 
@@ -41,17 +41,20 @@ namespace GXPEngine.Classes
 
         void Update()
         {
-            //Variables setted every frame
-            _onGround = false;
-            _frameCounter++;
+            if (!((MyGame)game).IsPaused())
+            {
+                //Variables setted every frame
+                _onGround = false;
+                _frameCounter++;
 
-            Animate();
+                Animate();
 
-            checkCollisions();
+                checkCollisions();
 
-            move();
+                move();
 
-            applyGravity();
+                applyGravity();
+            }
         }
 
         private void Animate()
@@ -79,12 +82,16 @@ namespace GXPEngine.Classes
         private void checkCollisions()
         {
             //TODO check for swordman
-            if (_screenSection != Convert.ToInt32(Math.Floor(this.x / 780)))
+            if (_screenSection != Convert.ToInt32(Math.Floor((this.x) / (800))))
+            {
+                _movingRight = !_movingRight;
+            }
+            else if (_screenSection != Convert.ToInt32(Math.Floor((this.x + width + 1) / (800))))
             {
                 _movingRight = !_movingRight;
             }
 
-            GameObject[] collisions = this.GetCollisions();
+                GameObject[] collisions = this.GetCollisions();
             for (int i = 0; i < collisions.Length; i++)
             {
 

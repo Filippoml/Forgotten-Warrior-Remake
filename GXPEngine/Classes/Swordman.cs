@@ -14,13 +14,13 @@ namespace GXPEngine.Classes
         /// </summary>
         private bool _colliding = false;
 
-        private float _velocity = 0, _speed = 2, _xCanFlip;
+        private float _velocity = 0, _speed = 2;
 
         private int _counter = 0, _frameRate = 12, _screenSection;
 
-        private bool _movingRight = false, _playerRight = false, _canFlip = true;
+        private bool _movingRight = false, _playerRight = false, _canFlip = true, delay = true, _attacked, _whereGo;
 
-        private System.Timers.Timer _timer, _timer2;
+        private System.Timers.Timer _timer, _timer2, _timer3, _timer4;
 
         private Status _status;
 
@@ -74,7 +74,7 @@ namespace GXPEngine.Classes
         bool test = true;
         public Swordman(float x, float y) : base("Data/swordman.png", 5, 1)
         {
-            SetScaleXY(1.2f);
+            SetScaleXY(1.3f);
             this.x = x;
             this.y = y;
             currentFrame = 1;
@@ -88,6 +88,23 @@ namespace GXPEngine.Classes
             _timer2.Elapsed += new ElapsedEventHandler(OnTimedEvent2);
             _timer2.Interval = 500;
             _timer2.Enabled = false;
+
+            _timer3 = new System.Timers.Timer();
+            _timer3.Elapsed += new ElapsedEventHandler(OnTimedEvent3);
+            _timer3.Interval = 1500;
+            _timer3.Enabled = false;
+
+
+            _timer3 = new System.Timers.Timer();
+            _timer3.Elapsed += new ElapsedEventHandler(OnTimedEvent3);
+            _timer3.Interval = 1500;
+            _timer3.Enabled = false;
+
+
+            _timer4 = new System.Timers.Timer();
+            _timer4.Elapsed += new ElapsedEventHandler(OnTimedEvent4);
+            _timer4.Interval = 1500;
+            _timer4.Enabled = false;
 
             _status = new Status();
             AddChild(_status);
@@ -104,6 +121,7 @@ namespace GXPEngine.Classes
             _colliderBox2 = new Collider("Data/HitBox2.png", this);
             _colliderBox2.SetOrigin(-20, -20);
             AddChild(_colliderBox);
+
             AddChild(_colliderBox2);
 
 
@@ -123,6 +141,21 @@ namespace GXPEngine.Classes
             _player = ((MyGame)game).GetPlayer();
         }
 
+        private void OnTimedEvent4(object sender, ElapsedEventArgs e)
+        {
+            _currentState = State.FOLLOWING;
+            _timer4.Enabled = false;
+            _attacked = false;
+
+        }
+
+        private void OnTimedEvent3(object sender, ElapsedEventArgs e)
+        {
+
+            delay = true;
+            _timer3.Enabled = false;
+        }
+
         private void OnTimedEvent2(object sender, ElapsedEventArgs e)
         {
             _lifeBar.visible = false;
@@ -138,296 +171,352 @@ namespace GXPEngine.Classes
         void Update()
         {
 
-            
 
-            _counter++;
 
-            _colliding = false;
-
-            if (_currentState != State.DYING)
+            if (!((MyGame)game).IsPaused())
             {
-                GameObject[] collisions = _colliderBox.GetCollisions();
-                for (int i = 0; i < collisions.Length; i++)
-                {
 
-                    if (collisions[i] is Tile)
+
+                _counter++;
+
+                _colliding = false;
+
+                if (_currentState != State.DYING)
+                {
+                    GameObject[] collisions = _colliderBox.GetCollisions();
+                    for (int i = 0; i < collisions.Length; i++)
                     {
 
-                        Tile _tile = collisions[i] as Tile;
-                        //Check if player is colliding with ground tiles
-                        if (_tile.GetId() >= 1 && _tile.GetId() <= 3)
+                        if (collisions[i] is Tile)
                         {
-
-                            y = _tile.y - this.height + 10;
-                            _colliding = true;
-                        }
-                        if (_screenSection != Convert.ToInt32(Math.Floor(this.x / 810)))
-                        {
-                            _movingRight = !_movingRight;
-                        }
-
-                        if (_tile.GetId() == 1 || _tile.GetId() == 3 || _screenSection != Convert.ToInt32(Math.Floor(this.x / 810)))
-                        {
-                            if (_canFlip)
+                            Tile _tile = collisions[i] as Tile;
+                            //Check if player is colliding with ground tiles
+                            if (_tile.GetId() >= 1 && _tile.GetId() <= 3)
                             {
-                                _canFlip = false;
-                                _movingRight = !_movingRight;
-                                _xCanFlip = this.x;
+
+                                y = _tile.y - this.height + 14;
+                                _colliding = true;
                             }
+
+                            if (_tile.GetId() == 1 || _tile.GetId() == 3 || _screenSection != Convert.ToInt32(Math.Floor((this.x - 10) / (800))) || _screenSection != Convert.ToInt32(Math.Floor((this.x + width + 1) / (800))))
+                            {
+                                if (_canFlip && !_attacked && !_whereGo)
+                                {
+                                    _movingRight = !_movingRight;
+                                }
+                                else if (_attacked)
+                                {
+                                    _whereGo = true;
+                                }
+                                _canFlip = false;
+                                i = collisions.Length;
+                            }
+                            else
+                            {
+                                _whereGo = false;
+                                _canFlip = true;
+                            }
+
+
+                            if (_currentState == State.ATTACKING)
+                            {
+                                _currentState = State.IDLE;
+                            }
+
+
+                        }
+
+
+                    }
+
+
+                    if (_currentState == State.MOVING && _currentState != State.FOLLOWING)
+                    {
+                        if (_movingRight)
+                        {
+                            x += _speed;
                         }
                         else
                         {
-                            _canFlip = true;
+                            x -= _speed;
                         }
-
-                        if (_currentState == State.ATTACKING)
+                    }
+                    else if (_currentState == State.FOLLOWING)
+                    {
+                        if (_playerRight)
                         {
-                            _currentState = State.IDLE;
+                            x += _speed;
                         }
-
-
-                    }
-
-
-                }
-
-
-                if (_currentState == State.MOVING && _currentState != State.FOLLOWING)
-                {
-                    if (_movingRight)
-                    {
-                        x += _speed;
-                    }
-                    else
-                    {
-                        x -= _speed;
-                    }
-                }
-                else if (_currentState == State.FOLLOWING)
-                {
-                    if (_playerRight)
-                    {
-                        x += _speed;
-                    }
-                    else
-                    {
-                        x -= _speed;
-                    }
-                }
-
-                collisions = _currentWeapon.GetCollisions();
-                for (int i = 0; i < collisions.Length; i++)
-                {
-                    if (collisions[i] is Collider)
-                    {
-                        if (collisions[i] == _player.getCollider())
+                        else
                         {
-                            _currentState = State.ATTACKING;
-
-
+                            x -= _speed;
                         }
                     }
-                }
 
-
-                if (_currentState != State.SLEEPING && Math.Floor(this.x / 800) == Math.Floor(_player.x / 800) && Math.Abs(this.y - _player.y) < 100)
-                {
-                    //Detect player
-                    if (_player.x > this.x && !_mirrorX && _currentState != State.ATTACKING)
+                    if (_player.GetState() != Player.State.HIDING)
                     {
-                        _playerRight = true;
-                        _currentState = State.FOLLOWING;
+                        collisions = _currentWeapon.GetCollisions();
+                        for (int i = 0; i < collisions.Length; i++)
+                        {
+                            if (collisions[i] is Collider)
+                            {
+                                if (collisions[i] == _player.getCollider())
+                                {
+                                    _currentState = State.ATTACKING;
+
+                                    i = collisions.Length;
+                                }
+                            }
+                        }
                     }
-                    else if (_player.x < this.x && _mirrorX && _currentState != State.ATTACKING)
+
+
+                    if (_currentState != State.SLEEPING && Math.Floor(this.x / 800) == Math.Floor(_player.x / 800) && Math.Abs(this.y - _player.y) < 100 && Math.Abs(this.x - _player.x) < 200 && _player.GetState() != Player.State.HIDING)
                     {
-                        _playerRight = false;
-                        _currentState = State.FOLLOWING;
+                        //Detect player
+                        if (_player.x > this.x && !_mirrorX && _currentState != State.ATTACKING)
+                        {
+                            _playerRight = true;
+                            if (_attacked)
+                            {
+                                _timer4.Enabled = true;
+
+                            }
+                            else
+                            {
+                                _currentState = State.FOLLOWING;
+                            }
+
+                        }
+                        else if (_player.x < this.x && _mirrorX && _currentState != State.ATTACKING)
+                        {
+                            _playerRight = false;
+                            if (_attacked)
+                            {
+                                _timer4.Enabled = true;
+                            }
+                            else
+                            {
+                                _currentState = State.FOLLOWING;
+                            }
+
+                        }
+                        else
+                        {
+                            if (_currentState == State.FOLLOWING)
+                            {
+
+                                _currentState = State.IDLE;
+                            }
+                            _attacked = false;
+                        }
                     }
                     else
                     {
+
                         if (_currentState == State.FOLLOWING)
                         {
                             _currentState = State.IDLE;
                         }
-                    }
-                }
-                else
-                {
+                        _attacked = false;
 
-                    if (_currentState == State.FOLLOWING)
-                    {
-                        _currentState = State.IDLE;
                     }
 
 
-                }
-
-
-                //I HAVE TO EDIT THE NAME OF THE VARIABLE
-                if (test && _currentState != State.FOLLOWING)
-                {
-                    test = false;
-                    Random rnd = new Random();
-                    _timer.Interval = rnd.Next(1000, 2500);
-                    if (_currentState != State.ATTACKING && _colliding)
+                    //I HAVE TO EDIT THE NAME OF THE VARIABLE
+                    if (test && _currentState != State.FOLLOWING)
                     {
-
-
-
-                        int _randomAction = rnd.Next(0, 5);
-                        _status.SetVisible(false);
-
-                        switch (_randomAction)
+                        test = false;
+                        Random rnd = new Random();
+                        _timer.Interval = rnd.Next(1000, 2500);
+                        if (_currentState != State.ATTACKING && _colliding && !_attacked)
                         {
-                            case 1:
-                            case 2:
-                                _currentState = State.IDLE;
 
-                                int _randomStatus = rnd.Next(0, 2);
 
-                                if (_randomStatus == 0)
-                                {
+
+                            int _randomAction = rnd.Next(0, 5);
+                            _status.SetVisible(false);
+
+                            switch (_randomAction)
+                            {
+                                case 1:
+                                case 2:
+                                    _currentState = State.IDLE;
+
+                                    int _randomStatus = rnd.Next(0, 2);
+
+                                    if (_randomStatus == 0)
+                                    {
+                                        _status.SetVisible(true);
+                                        _status.SetFrame(_randomStatus);
+                                    }
+                                    break;
+
+                                case 3:
+                                    _currentState = State.MOVING;
+                                    if (_canFlip)
+                                    {
+                                        int _direction = rnd.Next(0, 2);
+
+                                        if (_direction == 1)
+                                        {
+                                            _movingRight = true;
+                                        }
+                                        else
+                                        {
+                                            _movingRight = true;
+                                        }
+                                    }
+                                    break;
+
+                                case 4:
+                                    _currentState = State.SLEEPING;
                                     _status.SetVisible(true);
-                                    _status.SetFrame(_randomStatus);
-                                }
-                                break;
+                                    _status.SetFrame(1);
 
-                            case 3:
-                                _currentState = State.MOVING;
-                                int _direction = rnd.Next(0, 2);
-                                if (_direction == 1)
-                                {
-                                    _movingRight = true;
-                                }
-                                else
-                                {
-                                    _movingRight = false;
-                                }
-                                break;
+                                    break;
+                            }
 
-                            case 4:
-                                _currentState = State.SLEEPING;
-                                _status.SetVisible(true);
-                                _status.SetFrame(1);
-
-                                break;
                         }
-
                     }
-                }
 
-            }
-            else
-            {
-
-                _colliding = true;
-            }
-
-            if (_counter == (60 / _frameRate))
-            {
-               
-
-
-                _currentWeapon.SetVisible(false, _mirrorX, -25 , 15);
-                if (_movingRight)
-                {
-                    if (_mirrorX)
-                    {
-                        _colliderBox2.SetOrigin(-20, -20);
-                        Mirror(false, false);
-                    }
                 }
                 else
                 {
-                    if (!_mirrorX)
-                    {
-                        _colliderBox2.SetOrigin(20, -20);
-                        Mirror(true, false);
-                    }
+
+                    _colliding = true;
                 }
-                if (_currentState != State.ATTACKING && _currentState != State.DYING)
+
+                if (_counter == (60 / _frameRate))
                 {
-                    _frameRate = 12;
-                    if (currentFrame > 0)
+
+
+
+                    _currentWeapon.SetVisible(false, _mirrorX, 0, 10);
+                    if (_movingRight)
                     {
-                        currentFrame = 0;
+                        if (_mirrorX)
+                        {
+                            _colliderBox2.SetOrigin(-20, -20);
+                            Mirror(false, false);
+                        }
                     }
                     else
                     {
-                        NextFrame();
+                        if (!_mirrorX)
+                        {
+                            _colliderBox2.SetOrigin(20, -20);
+                            Mirror(true, false);
+                        }
                     }
+                    if (_currentState != State.ATTACKING && _currentState != State.DYING)
+                    {
+
+                        if (currentFrame > 0)
+                        {
+                            currentFrame = 0;
+                        }
+                        else
+                        {
+                            NextFrame();
+                        }
+                    }
+
+                    switch (_currentState)
+                    {
+
+                        case State.SLEEPING:
+                            _status.floating();
+                            break;
+                        case State.FOLLOWING:
+                            _status.SetVisible(true);
+                            _status.SetFrame(2);
+                            break;
+                        case State.ATTACKING:
+                            if (delay)
+                            {
+
+                                currentFrame = 2;
+                                _currentWeapon.SetVisible(true, _mirrorX, 0, 10);
+                                _player.Attacked(10);
+                                delay = false;
+                                _timer3.Enabled = true;
+
+
+                            }
+                            else
+                            {
+                                if (currentFrame > 0)
+                                {
+                                    currentFrame = 0;
+                                }
+                                else
+                                {
+                                    NextFrame();
+                                }
+                                _currentWeapon.SetVisible(false, _mirrorX, 0, 10);
+                            }
+                            _status.SetVisible(false);
+                            break;
+                        case State.DYING:
+                            if (currentFrame == 3)
+                            {
+                                currentFrame = 4;
+                            }
+                            else if (currentFrame == 4)
+                            {
+                                this.Destroy();
+                            }
+                            else
+                            {
+                                currentFrame = 3;
+                            }
+                            break;
+                    }
+
+                    _counter = 0;
+                    _hitSprite.visible = false;
                 }
 
-                switch (_currentState)
+                if (_colliderBox.HitTest(_player.GetWeapon()) && _player.GetWeapon().visible && Math.Floor(_player.x / 800) == _screenSection)
                 {
-                   
-                    case State.SLEEPING:
-                        _status.floating();
-                        break;
-                    case State.FOLLOWING:
-                        _status.SetVisible(true);
-                        _status.SetFrame(2);
-                        break;
-                    case State.ATTACKING:
-                        _frameRate = 8;
-                        if (currentFrame == 2)
-                        {
-                            currentFrame = 1;
-                            _currentWeapon.SetVisible(false, _mirrorX, -25, 15);
-                        }
-                        else
-                        {
-                            currentFrame = 2;
-                            _currentWeapon.SetVisible(true, _mirrorX, -25, 15);
-                            _player.Attacked(10);
-                        }
-                        _status.SetVisible(false);
-                        break;
-                    case State.DYING:
-                        if (currentFrame == 3)
-                        {
-                            currentFrame = 4;
-                        }
-                        else if(currentFrame == 4)
-                        {
-                            this.Destroy();
-                        }
-                        else
-                        {
-                            currentFrame = 3;
-                        }
-                        break;
+
+                    Attacked(0);
+                    _player.GetWeapon().SetReturing();
                 }
 
-                _counter = 0;
-                _hitSprite.visible = false;
-            }
-
-            
-
-            if (!_colliding)
-            {
-                _velocity += 0.2f;
-                y += _velocity;
+                if (!_colliding)
+                {
+                    _velocity += 0.2f;
+                    y += _velocity;
+                }
             }
         }
 
         public void Attacked(int damage)
         {
-            if (_player.x > this.x)
+            
+            _attacked = true;
+
+            _currentState = State.IDLE;
+            _status.visible = false;
+            if (_canFlip) //Check if the player is not in the border or is going to fall
             {
-                x -= 10;
+                if (_player.x > this.x)
+                {
+                    x -= 10;
+                }
+                else if (_player.x < this.x)
+                {
+                    x += 10;
+                }
             }
-            else if (_player.x < this.x)
-            {
-                x += 10;
-            }
+
 
             _lifePoints -= damage;
             _lifeBar.visible = true;
             _lifeBar.Update(_lifePoints);
             _timer2.Enabled = true;
-
             
             _hitSprite.visible = true;
 
@@ -444,6 +533,8 @@ namespace GXPEngine.Classes
             {
                 _currentState = State.DYING;
             }
+
+            
         }
 
         public Collider getCollider()

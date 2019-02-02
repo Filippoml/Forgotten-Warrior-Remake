@@ -49,7 +49,9 @@
     <Reference Include="System.Xml.Linq" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Classes\Chest.cs" />
     <Compile Include="Classes\Coin.cs" />
+    <Compile Include="Classes\Dialog.cs" />
     <Compile Include="Classes\Enemy.cs" />
     <Compile Include="Classes\Fire.cs" />
     <Compile Include="Classes\HUD.cs" />

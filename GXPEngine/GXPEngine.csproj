@@ -50,6 +50,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Classes\Chest.cs" />
+    <Compile Include="Classes\Menu.cs" />
     <Compile Include="Classes\Coin.cs" />
     <Compile Include="Classes\Dialog.cs" />
     <Compile Include="Classes\Enemy.cs" />
@@ -64,6 +65,7 @@
     <Compile Include="Classes\Shop.cs" />
     <Compile Include="Classes\Status.cs" />
     <Compile Include="Classes\Swordman.cs" />
+    <Compile Include="Classes\Trigger.cs" />
     <Compile Include="Classes\Weapon.cs" />
     <Compile Include="Classes\Tile.cs" />
     <Compile Include="Classes\Wizard.cs" />
@@ -100,6 +102,11 @@
     <Compile Include="GXPEngine\AddOns\TiledMapParser.cs" />
     <Compile Include="GXPEngine\AddOns\Window.cs" />
     <Compile Include="GXPEngine\AddOns\EasyDraw.cs" />
+    <Compile Include="Properties\Data.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>Data.settings</DependentUpon>
+    </Compile>
     <Compile Include="TiledSharp\AssemblyInfo.cs" />
     <Compile Include="TiledSharp\Group.cs" />
     <Compile Include="TiledSharp\ImageLayer.cs" />
@@ -112,5 +119,9 @@
   <ItemGroup>
     <None Include="app.config" />
     <None Include="packages.config" />
+    <None Include="Properties\Data.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Data.Designer.cs</LastGenOutput>
+    </None>
   </ItemGroup>
 </Project>

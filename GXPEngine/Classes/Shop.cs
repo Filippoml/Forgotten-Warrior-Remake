@@ -84,6 +84,7 @@ namespace GXPEngine.Classes
             pfc.AddFontFile("Data/LCD Solid.ttf");
             _font = new Font(new FontFamily(pfc.Families[0].Name), 10, FontStyle.Regular);
 
+            Clear();
             _easyDraw.graphics.DrawString("WELCOME", _font, new SolidBrush(Color.White), new PointF(80, 200));
         }
         void Update()   
@@ -136,15 +137,7 @@ namespace GXPEngine.Classes
                 {
                     _shop_rect.y -= 18;
                     _indexMode--;
-
-
-
                 }
-                Item _item = _items.Item[4];
-
-
-                _easyDraw.graphics.DrawString(_item.Value, _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
-                _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
 
             }
             else if (Input.GetKeyDown(Key.S))
@@ -162,31 +155,56 @@ namespace GXPEngine.Classes
                 switch(_indexMode)
                 {
                     case 0:
-                        if (_player.GetCoinsNumber() >= _item.Cost)
+                        //if (_player.GetCoinsNumber() >= _item.Cost)
+                        //{
+                        if (true)
                         {
-                            _player.SetCoinsNumber(false, _item.Cost);
-                            _easyDraw.Clear(Color.Transparent);
-                            _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
-                            _easyDraw.graphics.DrawString(_item.Cost.ToString(), _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
+
+                     
 
                             switch (_indexItems)
                             {
+                                case 0:
+                                case 1:
+                                case 2:
+                                    _player.GetWeapon().SetWeapon(_indexItems + 1);
+                                    _player.SetCoinsNumber(false, _item.Cost);
+                                    Clear();
+                                    _easyDraw.graphics.DrawString("ITEM PURCHASED", _font, new SolidBrush(Color.White), new PointF(60, 200));
+                                    break;
                                 case 3:
-                                    _hud.SetHealthPotionsNumber(true);
+                                    if(_hud.GetHealthPotionsNumber() < 9)
+                                    {
+                                        _hud.SetHealthPotionsNumber(true);
+                                        _player.SetCoinsNumber(false, _item.Cost);
+                                        Clear();
+                                        _easyDraw.graphics.DrawString("ITEM PURCHASED", _font, new SolidBrush(Color.White), new PointF(60, 200));
+                                    }
+
                                     break;
                                 case 4:
-                                    _hud.SetManaPotionsNumber(true);                                
+                                    if (_hud.GetManaPotionsNumber() < 9)
+                                    {
+                                        _hud.SetManaPotionsNumber(true);
+                                        _player.SetCoinsNumber(false, _item.Cost);
+                                        Clear();
+                                        _easyDraw.graphics.DrawString("ITEM PURCHASED", _font, new SolidBrush(Color.White), new PointF(60, 200));
+                                    }
+                                                               
                                     break;
                             }
 
                         }
                         else
                         {
+                            Clear();
                             _easyDraw.graphics.DrawString("NO ENOUGH MONEY", _font, new SolidBrush(Color.White), new PointF(55, 200));
                         }
                         break;
 
                     case 1:
+
+                        Clear();
                         switch (_item.Type)
                         {
                             case "weapon":
@@ -214,6 +232,13 @@ namespace GXPEngine.Classes
             
         }
 
+        private void Clear()
+        {
 
+            Item _item = _items.Item[_indexItems];
+            _easyDraw.Clear(Color.Transparent);
+            _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
+            _easyDraw.graphics.DrawString(_item.Cost.ToString(), _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
+        }
     }
 }

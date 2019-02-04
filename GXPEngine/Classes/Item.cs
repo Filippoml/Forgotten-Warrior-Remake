@@ -30,5 +30,10 @@ public class Items
 {
     [XmlElement(ElementName = "Item")]
     public List<Item> Item { get; set; }
+
+    private void test()
+    {
+
+    }
 }
 

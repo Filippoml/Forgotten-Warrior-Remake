@@ -12,7 +12,8 @@ namespace GXPEngine.Classes
         Dialog _dialog;
         private int _lootQuantity;
         private String _lootType;
-
+        
+        Random rnd = new Random(Guid.NewGuid().GetHashCode());
         public Chest (float x, float y): base ("Data/chest.png", 2, 1)
         {
             this.x = x;
@@ -21,11 +22,9 @@ namespace GXPEngine.Classes
             _player = ((MyGame)game).GetPlayer();
 
             _dialog = new Dialog();
-            _dialog.y = 600;
             ((MyGame)game).AddChild(_dialog);
             _dialog.visible = false;
 
-            Random rnd = new Random();
             _lootQuantity = 1;
             switch (rnd.Next(1, 4))
             {
@@ -40,10 +39,12 @@ namespace GXPEngine.Classes
                     _lootQuantity = rnd.Next(20, 51);
                     break;
             }
+            
         }
 
         void Update()
         {
+   
             if (!_dialog.visible && currentFrame == 0)
             {
                 if (this.HitTest(_player.getCollider()))

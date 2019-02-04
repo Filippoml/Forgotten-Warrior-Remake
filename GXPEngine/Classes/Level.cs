@@ -1,9 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using GXPEngine.GXPEngine;
+
 using TiledMapParser;
 
 namespace GXPEngine.Classes
@@ -13,31 +14,49 @@ namespace GXPEngine.Classes
         private Player _player;
         private int _scrollIndex = 0;
 
+
+        private HUD _hud;
         private Tile[] Tiles;
 
         private int _num_objects;
 
         private string _filename;
 
-        public Level(int index)
+        public Level()
         {
-            _filename = "Data/";
             Tiles = new Tile[2000];
-
-            switch (index)
-            {
-                case 1:
-                    _filename += "level.tmx";
-                    break;
-            }
-
         }
 
         public Player GetPlayer() => _player;
+        private Shop _shop;
 
-
-        public void generateLevel()
+        public void generateLevel(int index)
         {
+            _filename = "Data/";
+            switch (index)
+            {
+                case 1:
+                    _filename += "level1.tmx";
+                    break;
+                case 2:
+                    _filename += "level1.tmx";
+                    break;
+            }
+
+
+            //Background creation
+
+            Bitmap Bmp = new Bitmap(800, 600);
+            Graphics gfx = Graphics.FromImage(Bmp);
+            SolidBrush brush = new SolidBrush(Color.FromArgb(135, 206, 235));
+            gfx.FillRectangle(brush, 0, 0, 800, 600);
+
+            Sprite _background = new Sprite(Bmp);
+            AddChild(_background);
+            _background.width = 5000;
+            _background.height = 5000;
+
+
             Map level = MapParser.ReadMap(_filename);
 
 
@@ -97,7 +116,7 @@ namespace GXPEngine.Classes
                 }
             }
 
-            _player = new Player(100, 1000);
+            _player = new Player(100, 400);
             for (int i = 0; i < level.ObjectGroups[0].Objects.Length; i++)
             {
                 TiledObject _object = level.ObjectGroups[0].Objects[i];
@@ -112,6 +131,10 @@ namespace GXPEngine.Classes
                     case "Chest":
                         Chest _chest = new Chest(_object.X, _object.Y);
                         AddChild(_chest);
+                        break;
+                    case "Trigger":
+                        Trigger _trigger = new Trigger(_object.X, _object.Y);
+                        AddChild(_trigger);
                         break;
                 }
                 
@@ -138,27 +161,56 @@ namespace GXPEngine.Classes
                         break;
                 }
             }
+
+
+            _hud = new HUD();
+            _hud.SetXY(300, 570);
+            ((MyGame)game).AddChild(_hud);
+
+            _shop = new Shop(175, 50);
+            _shop.visible = false;
+            ((MyGame)game).AddChild(_shop);
+
+            _player.LoadHUD();
+
+
+
+
+        }
+        public HUD GetHud()
+        {
+            return _hud;
         }
 
         void Update()
         {
-            if (Input.GetKeyUp(Key.F)){
-                Translate(-800, 0);
-            }
-            if (Input.GetKeyUp(Key.R))
+
+            if (_player != null)
             {
-                Translate(800, 0);
+                if (Input.GetKeyUp(Key.F))
+                {
+                    Translate(-800, 0);
+                }
+                if (Input.GetKeyUp(Key.R))
+                {
+                    Translate(800, 0);
+                }
+                if ((int)Math.Floor((_player.x + _player.width) / 800) < _scrollIndex)
+                {
+                    _scrollIndex = (int)Math.Floor(_player.x / 800);
+                    Translate(800, 0);
+                }
+                else if ((int)Math.Floor(_player.x / 800) > _scrollIndex)
+                {
+                    _scrollIndex = (int)Math.Floor(_player.x / 800);
+                    Translate(-800, 0);
+                }
             }
-            if ((int)Math.Floor((_player.x + _player.width) / 800) < _scrollIndex)
-            {
-                _scrollIndex = (int)Math.Floor(_player.x / 800);
-                Translate(800, 0);
-            }
-            else if ((int)Math.Floor(_player.x / 800) > _scrollIndex)
-            {
-                _scrollIndex = (int)Math.Floor(_player.x / 800);
-                Translate(-800, 0);
-            }
+        }
+
+        public void ShowShop(bool value)
+        {
+            _shop.visible = value;
         }
     }
 

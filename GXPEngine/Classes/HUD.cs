@@ -18,7 +18,7 @@ namespace GXPEngine.Classes
 
         private EasyDraw _easyDraw;
 
-        private int _health_potion_number, _mana_potion_number;
+        private int _health_potion_number, _mana_potion_number, _playerManaPoints;
 
         private Sprite [] _notchArray;
 
@@ -29,6 +29,10 @@ namespace GXPEngine.Classes
             AddChild(stats);
 
             _player = ((MyGame)game).GetPlayer();
+
+            _health_potion_number = GXPEngine.Properties.Data.Default.healthpotions;
+            _mana_potion_number = GXPEngine.Properties.Data.Default.manapotions;
+
 
             Bitmap Bmp = new Bitmap(100, 100);
             Graphics gfx = Graphics.FromImage(Bmp);
@@ -71,16 +75,7 @@ namespace GXPEngine.Classes
             _mana2.height = 3;
             AddChild(_mana2);
 
-
-
-           
-            for (int i = 0; i < (_player.GetManaPoints()*3) / 100; i++)
-            {
-                Sprite notch = new Sprite("Data/notch.png");
-                notch.SetXY(189 + 19 * i, 9);
-                _notchArray[i] = notch;
-                AddChild(notch);
-            }
+   
 
             _easyDraw = new EasyDraw(100, 100);
             AddChild(_easyDraw);
@@ -89,25 +84,36 @@ namespace GXPEngine.Classes
             pfc.AddFontFile("Data/LCD Solid.ttf");
             _font = new Font(new FontFamily(pfc.Families[0].Name), 10, FontStyle.Regular);
 
+
+
+
+
             updateHUD();
-
-
         }
 
         void Update()
         {
+            
+            if (_player != null)
+            {
+                int lifePoints = _player.GetLifePoints();
 
-            //Updating rectangles witdh based on the player life
-            _life1.width = (46 * _player.GetLifePoints()) / 100;
-            _life2.width = (46 * _player.GetLifePoints()) / 100;
+                int manaPoins = _player.GetManaPoints();
 
-            _mana1.width = (56 * _player.GetManaPoints()) / 100;
-            _mana2.width = (56 * _player.GetManaPoints()) / 100;
+
+        
+                //Updating rectangles witdh based on the player life
+                _life1.width = (46 * lifePoints) / 100;
+                _life2.width = (46 * lifePoints) / 100;
+                _mana1.width = (56 * manaPoins) / 100;
+                _mana2.width = (56 * manaPoins) / 100;
+            }
         }
+
 
         public void SetHealthPotionsNumber(bool increment)
         {
-            if ((_health_potion_number > 0 && !increment) || (_health_potion_number < 10 && increment))
+            if ((_health_potion_number > 0 && !increment) || (_health_potion_number < 9 && increment))
             {
                 if (increment)
                 {
@@ -166,8 +172,12 @@ namespace GXPEngine.Classes
                     _notchArray[i].Destroy();
                 }
             }
+            if (_player != null)
+            {
+                _playerManaPoints = _player.GetManaPoints();
+            }
 
-            for (int i = 0; i < (_player.GetManaPoints() * 3) / 100; i++)
+            for (int i = 0; i < (_playerManaPoints * 3) / 100; i++)
             {
                 Sprite notch = new Sprite("Data/notch.png");
                 notch.SetXY(189 + 19 * i, 9);

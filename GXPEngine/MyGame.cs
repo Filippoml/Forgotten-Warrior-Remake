@@ -3,9 +3,13 @@ using System.Drawing;
 using GXPEngine;                                // GXPEngine contains the engine
 using GXPEngine.Classes;
 using GXPEngine.Core;
-using GXPEngine.GXPEngine;
 using TiledMapParser;
 using System.Windows;
+using System.IO;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Runtime.Serialization;
+using System.Text;
+using System.Security.Cryptography;
 
 /// <summary>
 /// Defines the <see cref="MyGame" />
@@ -14,9 +18,8 @@ public class MyGame : Game
 {
 
 
-    private HUD _hud;
     private Level _level;
-    private Shop _shop;
+
 
     private bool _paused;
 
@@ -27,42 +30,30 @@ public class MyGame : Game
     /// <summary>
     /// Initializes a new instance of the <see cref="MyGame"/> class.
     /// </summary>
-    public MyGame() : base(800, 600, false, false, pPixelArt: true)		// Create a window that's 800x600 and NOT fullscreen
+    /// 
+
+
+
+
+
+        public MyGame() : base(800, 600, false, false, pPixelArt: true)		// Create a window that's 800x600 and NOT fullscreen
     {
-        
 
-        
-        //Background creation
-        Bitmap Bmp = new Bitmap(width, height);
+
+          Menu _mainMenu = new Menu();
+        AddChild(_mainMenu);
+
+
+        _level = new Level();
+
+
+
+
+
+
+        Bitmap Bmp = new Bitmap(800, 200);
         Graphics gfx = Graphics.FromImage(Bmp);
-        SolidBrush brush = new SolidBrush(Color.FromArgb(135, 206, 235));
-        gfx.FillRectangle(brush, 0, 0, width, height);
-
-        Sprite _background = new Sprite(Bmp);
-        AddChild(_background);
-        _background.width = 5000;
-        _background.height = 5000;
-
-        _level = new Level(1);
-        _level.generateLevel();
-        AddChild(_level);
-
-
-        _hud = new HUD();
-        _hud.SetXY(300, 1170);
-        AddChild(_hud);
-
-        _shop = new Shop(175, 650);
-        game.Translate(0, -600);
-        _shop.visible = false;
-        AddChild(_shop);
-
-        _level.GetPlayer().LoadHUD();
-
-
-        Bmp = new Bitmap(800, 200);
-        gfx = Graphics.FromImage(Bmp);
-        brush = new SolidBrush(Color.Black);
+        SolidBrush brush = new SolidBrush(Color.Black);
         gfx.FillRectangle(brush, 0, 0, 800, 200);
 
 
@@ -77,7 +68,20 @@ public class MyGame : Game
 
         AddChild(_background3);
 
+
+
+
+
+
         _slideVelocity = 1;
+    }
+
+    public void ChangeLevel()
+    {
+        _level.Destroy();
+        _level = new Level();
+        AddChild(_level);
+        _level.generateLevel(2);
     }
 
     public void SetPaused(bool value)
@@ -92,12 +96,8 @@ public class MyGame : Game
 
     public HUD GetHud()
     {
-        return _hud;
-    }
-
-    public void ShowShop(bool value)
-    {
-        _shop.visible = value;        
+        HUD test = _level.GetHud(); 
+        return _level.GetHud();
     }
 
     public Player GetPlayer()
@@ -115,6 +115,7 @@ public class MyGame : Game
     /// </summary>
     void Update()
     {
+        /*
         Console.WriteLine(_background2.y);
         if((_background2.y + _slideVelocity + 1) < 600)
         {
@@ -137,7 +138,7 @@ public class MyGame : Game
 
             _paused = true;
         }
-
+        */
     }
 
     /// <summary>

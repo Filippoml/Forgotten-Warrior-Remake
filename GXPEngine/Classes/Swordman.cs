@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Timers;
-using GXPEngine.GXPEngine;
+
 
 namespace GXPEngine.Classes
 {
@@ -390,7 +390,12 @@ namespace GXPEngine.Classes
                 if (_counter == (60 / _frameRate))
                 {
 
+                    if (_colliderBox.HitTest(_player.GetWeapon()) && _player.GetWeapon().visible && Math.Floor(_player.x / 800) == _screenSection)
+                    {
 
+                        Attacked(10);
+                        _player.GetWeapon().SetReturing();
+                    }
 
                     _currentWeapon.SetVisible(false, _mirrorX, 0, 10);
                     if (_movingRight)
@@ -478,12 +483,7 @@ namespace GXPEngine.Classes
                     _hitSprite.visible = false;
                 }
 
-                if (_colliderBox.HitTest(_player.GetWeapon()) && _player.GetWeapon().visible && Math.Floor(_player.x / 800) == _screenSection)
-                {
 
-                    Attacked(0);
-                    _player.GetWeapon().SetReturing();
-                }
 
                 if (!_colliding)
                 {

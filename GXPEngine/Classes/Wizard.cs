@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
-using GXPEngine.GXPEngine;
 
 namespace GXPEngine.Classes
 {
@@ -77,7 +76,7 @@ namespace GXPEngine.Classes
         {
             SetScaleXY(1.2f);
             this.x = x;
-            this.y = y;
+            this.y = y - 32 - this.height;
             currentFrame = 1;
 
             _timer = new System.Timers.Timer();
@@ -381,7 +380,7 @@ namespace GXPEngine.Classes
 
                                 Projectile _projectile = new Projectile(x, y, !_mirrorX);
 
-
+                                
 
                                 ((MyGame)game).GetLevel().AddChild(_projectile);
 

@@ -90,8 +90,15 @@ namespace GXPEngine.Classes
 
         public void SetReturing()
         {
-            _returning = true;
-        
+            if (currentFrame != 0)
+            {
+                _returning = true;
+            }
+        }
+
+        public int GetWeapon()
+        {
+            return currentFrame;
         }
 
     }

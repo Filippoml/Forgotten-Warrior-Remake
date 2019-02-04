@@ -3,7 +3,7 @@ using System.Drawing;
 using System.IO;
 using System.Xml.Serialization;
 using GXPEngine.Core;
-using GXPEngine.GXPEngine;
+using GXPEngine.Properties;
 
 namespace GXPEngine.Classes
 {
@@ -19,7 +19,7 @@ namespace GXPEngine.Classes
 
         private float _speed, _yVelocity, _stairs_x, _hideX;
 
-        private bool _grounding, _canClimb, _attacked, _canHide, _canBuy;
+        private bool _grounding, _canClimb, _attacked, _canHide, _canBuy, _caPressWToClimb;
 
         private Collider _colliderBox;
 
@@ -27,7 +27,7 @@ namespace GXPEngine.Classes
 
         GameObject[] _collisions;
 
-        private Sprite _hitSprite, _redCircle;
+        private Sprite _hitSprite, _redCircle, _ray;
 
         private HUD _hud;
 
@@ -62,7 +62,7 @@ namespace GXPEngine.Classes
 
             //Creation Child Objects
             _currentWeapon = new Weapon();
-            _currentWeapon.SetWeapon(1);
+            _currentWeapon.SetWeapon(0);
             AddChild(_currentWeapon);
 
             _colliderBox = new Collider("Data/HitBox.png", this);
@@ -81,6 +81,12 @@ namespace GXPEngine.Classes
             _redCircle.y = height - (_redCircle.height * 2);
             AddChild(_redCircle);
 
+            _ray = new Sprite("Data/ray.png");
+            _ray.y = this.height;
+            _ray.x = this.height / 2;
+            _ray.visible = false;
+            AddChild(_ray);
+
             _yClimbdone = 110;
 
             string path = "Data/Items.xml";
@@ -90,6 +96,12 @@ namespace GXPEngine.Classes
             StreamReader reader = new StreamReader(path);
             _items = (Items)serializer.Deserialize(reader);
             reader.Close();
+
+
+            
+            /*GXPEngine.Properties.Data.Default.weapon = "prova";
+            GXPEngine.Properties.Data.Default.Save();
+            */
         }
 
 
@@ -99,6 +111,9 @@ namespace GXPEngine.Classes
         {
             if (!((MyGame)game).IsPaused())
             {
+                
+
+
 
                 if (_redCircle.y >= 0 && _redCircle.visible)
                 {
@@ -115,6 +130,11 @@ namespace GXPEngine.Classes
                 {
 
                     _currentState = State.IDLE;
+
+
+                    //TODO why?
+                    _yClimb = 0;
+
                 }
 
                 _frameCounter++;
@@ -126,6 +146,7 @@ namespace GXPEngine.Classes
 
                 _grounding = false;
                 _canClimb = false;
+                _caPressWToClimb = true;
                 _canHide = false;
                 _canBuy = false;
 
@@ -146,10 +167,10 @@ namespace GXPEngine.Classes
                 applyGravity();
 
                 //Respawn: just for testing
-                if (y > 1500)
+                if (y > 500)
                 {
                     x = 100;
-                    y = 1000;
+                    y = 400;
                     _yVelocity = 0;
                 }
             }
@@ -211,50 +232,53 @@ namespace GXPEngine.Classes
                     Coin _collision = _collisions[i] as Coin;
                     _coinsNumber += 10;
                     _collision.Destroy();
+                }
 
+                else if (_collisions[i] is Trigger)
+                {
+                    GXPEngine.Properties.Data.Default.healthpotions = 10;
+                    GXPEngine.Properties.Data.Default.Save();
+                  ((MyGame)game).ChangeLevel();
                 }
             }
 
-            
+            if (_currentState != State.CLIMBING)
+            {
+                _collisions = _ray.GetCollisions();
+                for (int i = 0; i < _collisions.Length; i++)
+                {
+                    if (_collisions[i] is Tile)
+                    {
+                        Tile _tile = _collisions[i] as Tile;
+
+
+                        if (_tile.GetId() == 20)
+                        {
+                            _caPressWToClimb = false;
+                            i = _collisions.Length;
+
+                            //TODO maybe can be replaced with return
+                        }
+                    }
+                }
+            }
+
+            if(!_caPressWToClimb)
+            {
+                _yClimb = _yClimbdone;
+            }
         }
 
         private void Animate()
         {
-            /*
-            if(_currentState == State.ATTACKING)
-            {
-                _collisions = _currentWeapon.GetCollisions();
-                for (int i = 0; i < _collisions.Length; i++)
-                {
-                    if (_collisions[i] is Collider)
-                    {
-
-                        Collider _collision = _collisions[i] as Collider;
-
-                        if (_collision.getOwner().GetType() == typeof(Swordman))
-                        {
-                            Console.WriteLine("rsda");
-                            Swordman _swordman = _collision.getOwner() as Swordman;
-                            _swordman.Attacked(0);
-                            i = _collisions.Length;
-                        }
-                        else if (_collision.getOwner().GetType() == typeof(Wizard))
-                        {
-                            Wizard wizard = _collision.getOwner() as Wizard;
-                            wizard.Attacked(25);
-                            i = _collisions.Length;
-                        }
-
-                    }
-
-                }
-            }
-            */
-
             if (_frameCounter == (60 / _frameRate))
             {
 
-                //_currentWeapon.SetVisible(false, false, -10, 10);
+                if(_currentWeapon.GetWeapon() == 0)
+                {
+                    _currentWeapon.SetVisible(false, false, 0, 0);
+                }
+
                 switch (_currentState)
                 {
                     case State.IDLE:
@@ -280,8 +304,20 @@ namespace GXPEngine.Classes
 
                         if (!(_currentWeapon.visible))
                         {
-                            _currentWeapon.SetOrigin(-12, 0);
-                            _currentWeapon.SetVisible(true, _mirrorX, -30, 30);
+              
+                      
+                            if(_currentWeapon.GetWeapon() == 0)
+                            {
+                                _currentWeapon.SetOrigin(0, 0);
+                                _currentWeapon.SetVisible(true, _mirrorX, 0, 20);
+                                
+                            }
+                            else
+                            {
+                                _currentWeapon.SetOrigin(-12, 0);
+                                _currentWeapon.SetVisible(true, _mirrorX, -30, 30);
+                            }
+
                         }
                         _currentState = State.IDLE;
                         
@@ -297,7 +333,7 @@ namespace GXPEngine.Classes
                                 {
                                     
                                     Swordman _swordman = _collision.getOwner() as Swordman;
-                                    _swordman.Attacked(0);
+                                    //_swordman.Attacked(0);
                                     i = _collisions.Length;
                                 }
                                 else if (_collision.getOwner().GetType() == typeof(Wizard))
@@ -369,7 +405,7 @@ namespace GXPEngine.Classes
 
         private void keyHandler()
         {
-            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING && !Input.GetKey(Key.D) && _currentState != State.HIDING)
+            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING && !Input.GetKey(Key.D) && _currentState != State.HIDING && x > 0)
             {
                 Move(-_speed, 0);
 
@@ -401,7 +437,11 @@ namespace GXPEngine.Classes
 
             if (Input.GetKey(Key.W) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
-                if (_canClimb && _yClimb < _yClimbdone)
+                float test = ((float)_yClimb / (float)_yClimbdone) ;
+
+
+
+                if (_canClimb && _yClimb < _yClimbdone && _caPressWToClimb)
                 {
                     _currentState = State.CLIMBING;
                     y -= 1.5f;
@@ -422,7 +462,7 @@ namespace GXPEngine.Classes
                     _currentState = State.HIDING;
                     if (_canBuy)
                     {
-                        ((MyGame)game).ShowShop(true);
+                        ((MyGame)game).GetLevel().ShowShop(true);
 
                     }
                 }
@@ -433,6 +473,7 @@ namespace GXPEngine.Classes
 
             if (Input.GetKey(Key.S) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
+
                     if (_canClimb && _yClimb > 0)
                     {
                         _yClimb--;
@@ -604,6 +645,5 @@ namespace GXPEngine.Classes
         {
             _hud.SetManaPotionsNumber(increment);
         }
-
     }
 }

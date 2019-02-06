@@ -10,13 +10,11 @@ namespace GXPEngine.Classes
 {
     public class Dialog : GameObject
     {
-        private Font _font;
-
+        private readonly Font _font;
         private EasyDraw _easyDraw;
 
         private Player _player;
 
-        private HUD _hud;
 
         public Dialog()
         {
@@ -82,7 +80,7 @@ namespace GXPEngine.Classes
                 {
                     if(lootType == "item3")
                     {
-                        _player.SetHealthPotionsNumber(true);
+                        ((MyGame)game).GetHud().SetHealthPotionsNumber(true);
                     }
                     else
                     {

@@ -1,46 +1,30 @@
-using System;                                   // System contains a lot of default C# libraries 
 using System.Drawing;
-using GXPEngine;                                // GXPEngine contains the engine
+using GXPEngine;                                
 using GXPEngine.Classes;
-using GXPEngine.Core;
+using GXPEngine.OpenGL;
 using TiledMapParser;
-using System.Windows;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Security.Cryptography;
 
-/// <summary>
-/// Defines the <see cref="MyGame" />
-/// </summary>
 public class MyGame : Game
 {
-
-
     private Level _level;
+    private Sprite _game, _over;
 
-
-    private bool _paused;
+    private bool _paused, _playerDied;
 
     private float _slideVelocity;
 
     private Sprite _background2, _background3;
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="MyGame"/> class.
-    /// </summary>
-    /// 
+    private int _timePassed;
 
+    private SoundChannel _soundChannel;
 
-
-
-
-        public MyGame() : base(800, 600, false, false, pPixelArt: true)		// Create a window that's 800x600 and NOT fullscreen
+    public MyGame() : base(800, 600, false, false, pPixelArt: true)
     {
 
-
-          Menu _mainMenu = new Menu();
+        Sound _sound = new Sound("Data/Sounds/theme.mp3", true, true);
+        _soundChannel = _sound.Play();
+        Menu _mainMenu = new Menu();
         AddChild(_mainMenu);
 
 
@@ -58,17 +42,15 @@ public class MyGame : Game
 
 
         _background2 = new Sprite(Bmp);
-        _background2.y = 400;
-        AddChild(_background2);
+ 
 
 
 
         _background3 = new Sprite(Bmp);
-        _background3.y = 1200;
-
-        AddChild(_background3);
 
 
+        _background2.y = -200;
+        _background3.y = 600;
 
 
 
@@ -81,7 +63,11 @@ public class MyGame : Game
         _level.Destroy();
         _level = new Level();
         AddChild(_level);
-        _level.generateLevel(2);
+        
+        GXPEngine.Properties.Data.Default.level++;
+
+        GXPEngine.Properties.Data.Default.Save();
+        _level.generateLevel(GXPEngine.Properties.Data.Default.level);
     }
 
     public void SetPaused(bool value)
@@ -115,40 +101,94 @@ public class MyGame : Game
     /// </summary>
     void Update()
     {
-        /*
-        Console.WriteLine(_background2.y);
-        if((_background2.y + _slideVelocity + 1) < 600)
+        
+        if (_playerDied)
         {
-            _slideVelocity += 0.1f;
-            _background2.y += _slideVelocity;
 
-            _background3.y -= _slideVelocity;
+            _timePassed += Time.deltaTime;
+
+            if ((_background2.y + _slideVelocity + 1) < 0)
+            {
+                _slideVelocity += 0.1f;
+                _background2.y += _slideVelocity;
+
+                _background3.y -= _slideVelocity;
+
+                if(!_paused)
+                {
+                    _paused = true;
+                }
+            }
+            else
+            {
+                if(_game == null)
+                {
+                    _game = new Sprite("Data/game.png");
+                }
+
+                if(_over == null)
+                {
+                    _over = new Sprite("Data/over.png");
+                }
+                if (_timePassed >= 5000)
+                {
+                    _playerDied = false;
+                    _level.Destroy();
+                    _level = new Level();
+
+                    RemoveChild(_game);
+                    RemoveChild(_over);
+
+                    Menu _mainMenu = new Menu();
+                    AddChild(_mainMenu);
+
+                    _timePassed = 0;
+                    _paused = false;
+                   
+                    _background2.y = -200;
+                    _background3.y = 600;
+                    _slideVelocity = 1;
+
+                    Sound _sound = new Sound("Data/Sounds/theme.mp3", true, true);
+                    _soundChannel = _sound.Play();
+                }
+                else if (_timePassed >=  2000)
+                {
+                    _over.y = 290;
+                    _over.x = (width / 2) - (_over.width / 2) + 5;
+                    AddChild(_over);
+                }
+                else if (_timePassed >= 1000)
+                {
+                   
+                    _game.y = 260;
+                    _game.x = (width / 2) - (_game.width / 2);
+                    AddChild(_game);
+                }
+
+
+
+
+               
+            }
         }
-        else
-        {
-            Sprite _game = new Sprite("Data/game.png");
-            _game.y = 800;
-            _game.x = (width/2) - (_game.width/2);
-            AddChild(_game);
-
-            Sprite _over = new Sprite("Data/over.png");
-            _over.y = 830;
-            _over.x = (width / 2) - (_over.width / 2) + 5;
-            AddChild(_over);
-
-            _paused = true;
-        }
-        */
+        
     }
 
-    /// <summary>
-    /// The Main
-    /// </summary>
-    internal static void Main()							// Main() is the first method that's called when the program is run
+    public void PlayerDied()
     {
-        new MyGame().Start();
-        
-        
+        _soundChannel.Stop();
+        AddChild(_background2);
+        AddChild(_background3);
+        _playerDied = true;
+    }
+
+    // Main() is the first method that's called when the program is run
+    internal static void Main()	
+    {
         // Create a "MyGame" and start it
+        new MyGame().Start();
+
+
     }
 }

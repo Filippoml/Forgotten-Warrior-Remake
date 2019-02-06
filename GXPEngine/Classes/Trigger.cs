@@ -11,7 +11,7 @@ namespace GXPEngine.Classes
         public Trigger(float x, float y) : base("Data/coin.png")
         {
             this.x = x;
-            this.y = y - 32 - 25;
+            this.y = y - 32 - this.height;
 
         }
     }

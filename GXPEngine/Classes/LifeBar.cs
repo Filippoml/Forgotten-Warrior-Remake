@@ -10,72 +10,61 @@ namespace GXPEngine.Classes
     
     public class LifeBar : GameObject
     {
-        private Sprite _background, _background2, _background3;
+        private Sprite _border, _background, _foreground;
 
         public LifeBar() : base()
         {
-          
-            
-
+            //Border Rectangle
             Bitmap Bmp = new Bitmap(100, 100);
             Graphics gfx = Graphics.FromImage(Bmp);
             SolidBrush brush = new SolidBrush(Color.Black);
             gfx.FillRectangle(brush, 0, 0, 100, 100);
-            _background = new Sprite(Bmp);
-            AddChild(_background);
-            _background.width = 40;
-            _background.height = 10;
-            _background.x = 7;
-            _background.y = -12;
+            _border = new Sprite(Bmp)
+            {
+                width = 40,
+                height = 10,
+                x = 7,
+                y = -12
+            };
+            AddChild(_border);
 
-            Bmp = new Bitmap(100, 100);
-            gfx = Graphics.FromImage(Bmp);
+            //Background Rectangle
             brush = new SolidBrush(Color.Yellow);
             gfx.FillRectangle(brush, 0, 0, 100, 100);
+            _background = new Sprite(Bmp)
+            {
+                width = 36,
+                height = 6,
+                x = 8.75f,
+                y = -9.7f
+            };
+            AddChild(_background);
 
-            _background2 = new Sprite(Bmp);
-            AddChild(_background2);
-            _background2.width = 36;
-            _background2.height = 6;
-            _background2.x = 8.75f;
-            _background2.y = -9.7f;
-
-            Bmp = new Bitmap(100, 100);
-            gfx = Graphics.FromImage(Bmp);
+            //Foreground Rectangle
             brush = new SolidBrush(Color.Red);
             gfx.FillRectangle(brush, 0, 0, 100, 100);
-
-
-            _background3 = new Sprite(Bmp);
-            AddChild(_background3);
-            _background3.width = 36;
-            _background3.height = 6;
-            _background3.x = 8.75f;
-            _background3.y = -9.7f;
-
-
-            //AddChild(rectangle);
-
+            _foreground = new Sprite(Bmp)
+            {
+                width = 36,
+                height = 6,
+                x = 8.75f,
+                y = -9.7f
+            };
+            AddChild(_foreground);
         }
 
         public void Update(int lifepoints)
         {
-
-            if(_background3.width != (36 * lifepoints) / 100 && _background3.width > 0)
+            //Avoid negative lifepoints
+            if(lifepoints < 0)
             {
-                //_background3.width--;
-                _background3.width = (36 * lifepoints) / 100;
+                lifepoints = 0;
             }
-            else
+            //Check if value is changed
+            if(_foreground.width != (36 * lifepoints) / 100)
             {
-                //_background2.x = 8.6f;
-            }
-            
+                _foreground.width = (36 * lifepoints) / 100;
+            }            
         }
-
-
-        
-
-   
     }
 }

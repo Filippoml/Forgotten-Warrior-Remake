@@ -76,7 +76,7 @@ namespace GXPEngine.Classes
         {
             SetScaleXY(1.3f);
             this.x = x;
-            this.y = y;
+            this.y = y - 32 - this.height;
             currentFrame = 1;
 
             _timer = new System.Timers.Timer();
@@ -176,7 +176,7 @@ namespace GXPEngine.Classes
             if (!((MyGame)game).IsPaused())
             {
 
-
+                Console.WriteLine(_currentState);
                 _counter++;
 
                 _colliding = false;
@@ -191,29 +191,26 @@ namespace GXPEngine.Classes
                         {
                             Tile _tile = collisions[i] as Tile;
                             //Check if player is colliding with ground tiles
-                            if (_tile.GetId() >= 1 && _tile.GetId() <= 3)
+                            if (((_tile.GetId() >= 1 && _tile.GetId() <= 3) || (_tile.GetId() >= 7 && _tile.GetId() <= 9)))
                             {
 
                                 y = _tile.y - this.height + 14;
                                 _colliding = true;
                             }
 
-                            if (_tile.GetId() == 1 || _tile.GetId() == 3 || _screenSection != Convert.ToInt32(Math.Floor((this.x - 10) / (800))) || _screenSection != Convert.ToInt32(Math.Floor((this.x + width + 1) / (800))))
+                            if (_tile.GetId() == 1 || _tile.GetId() == 3 || _tile.GetId() == 7 || _tile.GetId() == 9 || _screenSection != Convert.ToInt32(Math.Floor((this.x - 10) / (800))) || _screenSection != Convert.ToInt32(Math.Floor((this.x + width + 1) / (800))))
                             {
-                                if (_canFlip && !_attacked && !_whereGo)
+                                if (_canFlip && !_attacked)
                                 {
                                     _movingRight = !_movingRight;
                                 }
-                                else if (_attacked)
-                                {
-                                    _whereGo = true;
-                                }
+                  
                                 _canFlip = false;
-                                i = collisions.Length;
+                                break;
                             }
                             else
                             {
-                                _whereGo = false;
+                              
                                 _canFlip = true;
                             }
 
@@ -225,6 +222,14 @@ namespace GXPEngine.Classes
 
 
                         }
+                        else if(collisions[i] is Sprite)
+                        {
+                            Sprite _tile = collisions[i] as Sprite;
+                            if(_tile.texture.filename == "Data/blue_wave.png" && Math.Floor(_player.x / 800) == _screenSection)
+                            {
+                                Attacked(100);
+                            }
+                        }
 
 
                     }
@@ -232,6 +237,7 @@ namespace GXPEngine.Classes
 
                     if (_currentState == State.MOVING && _currentState != State.FOLLOWING)
                     {
+                        
                         if (_movingRight)
                         {
                             x += _speed;
@@ -253,8 +259,9 @@ namespace GXPEngine.Classes
                         }
                     }
 
-                    if (_player.GetState() != Player.State.HIDING)
-                    {
+                    bool attacking = false;
+                    if (_player.GetState() != Player.State.HIDING && ((_player.x < this.x && _mirrorX) || _player.x > this.x && !_mirrorX))
+                    { 
                         collisions = _currentWeapon.GetCollisions();
                         for (int i = 0; i < collisions.Length; i++)
                         {
@@ -263,15 +270,24 @@ namespace GXPEngine.Classes
                                 if (collisions[i] == _player.getCollider())
                                 {
                                     _currentState = State.ATTACKING;
-
-                                    i = collisions.Length;
+                                    attacking = true;
+                                    break;
                                 }
                             }
                         }
                     }
+                    if(!attacking && _currentState == State.ATTACKING)
+                    {
+                        _currentState = State.IDLE;
+                    }
 
+                    int value = 50;
+                    if (_player.GetState() == Player.State.JUMPING || _player.GetState() == Player.State.FALLING)
+                    {
+                        value = 100;
+                    }
 
-                    if (_currentState != State.SLEEPING && Math.Floor(this.x / 800) == Math.Floor(_player.x / 800) && Math.Abs(this.y - _player.y) < 100 && Math.Abs(this.x - _player.x) < 200 && _player.GetState() != Player.State.HIDING)
+                    if (_currentState != State.SLEEPING && Math.Floor(this.x / 800) == Math.Floor(_player.x / 800) && Math.Abs(this.y - _player.y) < value && Math.Abs(this.x - _player.x) < 200 && _player.GetState() != Player.State.HIDING)
                     {
                         //Detect player
                         if (_player.x > this.x && !_mirrorX && _currentState != State.ATTACKING)
@@ -328,13 +344,13 @@ namespace GXPEngine.Classes
                     {
                         test = false;
                         Random rnd = new Random();
-                        _timer.Interval = rnd.Next(1000, 2500);
+                        _timer.Interval = Utils.Random(1000, 2500);
                         if (_currentState != State.ATTACKING && _colliding && !_attacked)
                         {
 
 
 
-                            int _randomAction = rnd.Next(0, 5);
+                            int _randomAction = Utils.Random(0, 5);
                             _status.SetVisible(false);
 
                             switch (_randomAction)
@@ -343,7 +359,7 @@ namespace GXPEngine.Classes
                                 case 2:
                                     _currentState = State.IDLE;
 
-                                    int _randomStatus = rnd.Next(0, 2);
+                                    int _randomStatus = Utils.Random(0, 2);
 
                                     if (_randomStatus == 0)
                                     {
@@ -356,7 +372,7 @@ namespace GXPEngine.Classes
                                     _currentState = State.MOVING;
                                     if (_canFlip)
                                     {
-                                        int _direction = rnd.Next(0, 2);
+                                        int _direction = Utils.Random(0, 2);
 
                                         if (_direction == 1)
                                         {
@@ -364,7 +380,7 @@ namespace GXPEngine.Classes
                                         }
                                         else
                                         {
-                                            _movingRight = true;
+                                            _movingRight = false;
                                         }
                                     }
                                     break;
@@ -392,9 +408,27 @@ namespace GXPEngine.Classes
 
                     if (_colliderBox.HitTest(_player.GetWeapon()) && _player.GetWeapon().visible && Math.Floor(_player.x / 800) == _screenSection)
                     {
+                        if(_player._mirrorX)
+                        {
+                            if(_player.x > this.x)
+                            {
+                                Attacked(_player.GetWeapon().GetDamage());
+                                _player.GetWeapon().SetReturing();
+                            }
+                        }
+                        else
+                        {
+                            Attacked(_player.GetWeapon().GetDamage());
+                
+                            _player.GetWeapon().SetReturing();
+                        }
 
-                        Attacked(10);
-                        _player.GetWeapon().SetReturing();
+                    }
+                    
+                    else
+                    {
+
+                        _hitSprite.visible = false;
                     }
 
                     _currentWeapon.SetVisible(false, _mirrorX, 0, 10);
@@ -443,7 +477,7 @@ namespace GXPEngine.Classes
 
                                 currentFrame = 2;
                                 _currentWeapon.SetVisible(true, _mirrorX, 0, 10);
-                                _player.Attacked(10);
+                                _player.Attacked(25);
                                 delay = false;
                                 _timer3.Enabled = true;
 
@@ -480,7 +514,7 @@ namespace GXPEngine.Classes
                     }
 
                     _counter = 0;
-                    _hitSprite.visible = false;
+
                 }
 
 
@@ -495,7 +529,7 @@ namespace GXPEngine.Classes
 
         public void Attacked(int damage)
         {
-            
+        
             _attacked = true;
 
             _currentState = State.IDLE;
@@ -519,6 +553,8 @@ namespace GXPEngine.Classes
             _timer2.Enabled = true;
             
             _hitSprite.visible = true;
+            Sound _sound = new Sound("Data/Sounds/hit.ogg", false, false);
+            _sound.Play();
 
             if (_player.x > this.x)
             {

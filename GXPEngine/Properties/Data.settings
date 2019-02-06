@@ -6,13 +6,13 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="lifepoints" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">100</Value>
     </Setting>
     <Setting Name="manapoints" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="level" Type="System.Int32" Scope="User">
-      <Value Profile="(Default)">0</Value>
+      <Value Profile="(Default)">1</Value>
     </Setting>
     <Setting Name="healthpotions" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">1</Value>

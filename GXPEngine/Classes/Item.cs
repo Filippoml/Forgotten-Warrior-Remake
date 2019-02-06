@@ -1,10 +1,4 @@
-﻿/* 
- Licensed under the Apache License, Version 2.0
-
- http://www.apache.org/licenses/LICENSE-2.0
- */
-using System;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 using System.Collections.Generic;
 [XmlRoot(ElementName = "Item")]
 public class Item
@@ -30,10 +24,5 @@ public class Items
 {
     [XmlElement(ElementName = "Item")]
     public List<Item> Item { get; set; }
-
-    private void test()
-    {
-
-    }
 }
 

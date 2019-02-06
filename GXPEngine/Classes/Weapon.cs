@@ -1,16 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Xml.Serialization;
 
 namespace GXPEngine.Classes
 {
     public class Weapon : AnimationSprite
     {
-        private int _range = 4;
+        private int _range, _damage;
 
         private float _xVelocity = 2, _startX;
+        
 
         private bool _returning = false;
         public Weapon () : base("Data/weapons.png",5,1)
@@ -18,7 +21,8 @@ namespace GXPEngine.Classes
            
             y = 15;
             visible = false;
-  
+
+            _damage = 20;
         }
 
         public void SetVisible(bool value, bool mirrored, int mirroredOffset1, int mirroredOffset2)
@@ -39,13 +43,26 @@ namespace GXPEngine.Classes
         public void SetWeapon(int weapon_number)
         {
             currentFrame = weapon_number;
+
+            if (weapon_number > 0)
+            {
+                string path = "Data/Items.xml";
+
+                XmlSerializer serializer = new XmlSerializer(typeof(Items));
+
+                StreamReader reader = new StreamReader(path);
+                Items _items = (Items)serializer.Deserialize(reader);
+                _damage = Convert.ToInt32(_items.Item[weapon_number - 1].Damage);
+                _range = Convert.ToInt32(_items.Item[weapon_number - 1].Range);
+                reader.Close();
+            }
         }
 
         void Update()
         {
             if (!((MyGame)game).IsPaused())
             {
-                if (currentFrame != 0)
+                if (currentFrame > 0 && currentFrame < 4)
                 {
                     if (Math.Abs(x) < _range * 20 && !_returning && visible)
                     {
@@ -99,6 +116,11 @@ namespace GXPEngine.Classes
         public int GetWeapon()
         {
             return currentFrame;
+        }
+
+        public int GetDamage()
+        {
+            return _damage;
         }
 
     }

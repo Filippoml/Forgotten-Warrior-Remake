@@ -22,6 +22,7 @@ namespace GXPEngine.Classes
             visible = value;
         }
 
+        //Visual effect
         public void floating()
         {
             _floating = !_floating;

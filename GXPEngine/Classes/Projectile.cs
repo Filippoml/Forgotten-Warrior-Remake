@@ -52,14 +52,13 @@ namespace GXPEngine.Classes
                     this.Destroy();
                 }
 
-                GameObject[] collisions = GetCollisions();
-                for (int i = 0; i < collisions.Length; i++)
+                if (_player != null)
                 {
-                    if (collisions[i] is Collider)
+                    if (_player.GetState() != Player.State.HIDING)
                     {
-                        if (collisions[i] == _player.getCollider())
+                        if (this.HitTest(_player))
                         {
-                            _player.Attacked(10);
+                            //_player.Attacked(25);
                             this.Destroy();
                         }
                     }

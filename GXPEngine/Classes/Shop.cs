@@ -52,7 +52,6 @@ namespace GXPEngine.Classes
             AddChild(_shop_rect);
 
 
-
             for (int i = 0; i < 5; i++)
             {                
                 Sprite _itemSprite = new Sprite("Data/item" + i + ".png");
@@ -84,7 +83,7 @@ namespace GXPEngine.Classes
             pfc.AddFontFile("Data/LCD Solid.ttf");
             _font = new Font(new FontFamily(pfc.Families[0].Name), 10, FontStyle.Regular);
 
-            Clear();
+     
             _easyDraw.graphics.DrawString("WELCOME", _font, new SolidBrush(Color.White), new PointF(80, 200));
         }
         void Update()   
@@ -94,6 +93,7 @@ namespace GXPEngine.Classes
                 if (visible)
                 {
                     keyHandler();
+
                 }
             }
         }
@@ -108,11 +108,8 @@ namespace GXPEngine.Classes
                 {
                     _background.x -= 32;
                     _indexItems--;
-                    Item _item = _items.Item[_indexItems];
-                    _easyDraw.Clear(Color.Transparent);
 
-                    _easyDraw.graphics.DrawString(_item.Cost.ToString(), _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
-                    _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
+                    Clear();
                 }
 
             }
@@ -123,10 +120,7 @@ namespace GXPEngine.Classes
                     _background.x += 32;
                     _indexItems++;
 
-                    Item _item = _items.Item[_indexItems];
-                    _easyDraw.Clear(Color.Transparent);
-                    _easyDraw.graphics.DrawString(_item.Cost.ToString(), _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
-                    _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
+                    Clear();
                 }
          
             }
@@ -155,10 +149,9 @@ namespace GXPEngine.Classes
                 switch(_indexMode)
                 {
                     case 0:
-                        //if (_player.GetCoinsNumber() >= _item.Cost)
-                        //{
-                        if (true)
+                        if (_player.GetCoinsNumber() >= _item.Cost)
                         {
+
 
                      
 
@@ -232,6 +225,12 @@ namespace GXPEngine.Classes
             
         }
 
+        public void Show()
+        {
+            Clear();
+            visible = true;
+        }
+
         private void Clear()
         {
 
@@ -239,6 +238,8 @@ namespace GXPEngine.Classes
             _easyDraw.Clear(Color.Transparent);
             _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
             _easyDraw.graphics.DrawString(_item.Cost.ToString(), _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
+
+            
         }
     }
 }

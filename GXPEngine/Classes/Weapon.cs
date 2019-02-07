@@ -16,12 +16,10 @@ namespace GXPEngine.Classes
         
 
         private bool _returning = false;
-        public Weapon () : base("Data/weapons.png",5,1)
+        public Weapon () : base("Data/AnimationSprites/weapons.png", 5,1)
         {
-           
             y = 15;
             visible = false;
-
             _damage = 20;
         }
 

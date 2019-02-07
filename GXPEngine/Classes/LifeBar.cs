@@ -10,7 +10,7 @@ namespace GXPEngine.Classes
     
     public class LifeBar : GameObject
     {
-        private Sprite _border, _background, _foreground;
+        private readonly Sprite _border, _background, _foreground;
 
         public LifeBar() : base()
         {

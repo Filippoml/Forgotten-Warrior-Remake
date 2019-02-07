@@ -53,7 +53,6 @@
     <Compile Include="Classes\Menu.cs" />
     <Compile Include="Classes\Coin.cs" />
     <Compile Include="Classes\Dialog.cs" />
-    <Compile Include="Classes\Enemy.cs" />
     <Compile Include="Classes\Fire.cs" />
     <Compile Include="Classes\HUD.cs" />
     <Compile Include="Classes\Item.cs" />
@@ -117,7 +116,9 @@
     <Compile Include="TiledSharp\Tileset.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="app.config" />
+    <None Include="app.config">
+      <SubType>Designer</SubType>
+    </None>
     <None Include="packages.config" />
     <None Include="Properties\Data.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

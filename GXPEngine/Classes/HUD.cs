@@ -26,7 +26,7 @@ namespace GXPEngine.Classes
 
         public HUD()
         {
-            Sprite stats = new Sprite("Data/hud_frame.png");
+            Sprite stats = new Sprite("Data/HUD/hud_frame.png");
             AddChild(stats);
 
 
@@ -83,7 +83,7 @@ namespace GXPEngine.Classes
             AddChild(_easyDraw);
 
             PrivateFontCollection pfc = new PrivateFontCollection();
-            pfc.AddFontFile("Data/LCD Solid.ttf");
+            pfc.AddFontFile("Data/Font/LCD Solid.ttf");
             _font = new Font(new FontFamily(pfc.Families[0].Name), 10, FontStyle.Regular);
 
             _notchArray = new Sprite[3];
@@ -186,7 +186,7 @@ namespace GXPEngine.Classes
 
             for (int i = 0; i < (manaPoints * 3) / 100; i++)
             {
-                Sprite notch = new Sprite("Data/notch.png");
+                Sprite notch = new Sprite("Data/HUD/notch.png");
                 notch.SetXY(189 + 19 * i, 9);
                 _notchArray[i] = notch;
                 AddChild(notch);

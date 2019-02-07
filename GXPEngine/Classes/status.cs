@@ -9,7 +9,7 @@ namespace GXPEngine.Classes
     class Status : AnimationSprite
     {
         private bool _floating = false;
-        public Status () : base("Data/status.png", 3, 1) {
+        public Status () : base("Data/AnimationSprites/status.png", 3, 1) {
             currentFrame = 3;
             x = 20;
             y = -5;
@@ -29,7 +29,6 @@ namespace GXPEngine.Classes
             if (_floating)
             {
                 y -= 2;
-                
             }
             else
             {

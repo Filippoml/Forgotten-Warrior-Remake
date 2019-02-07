@@ -26,7 +26,7 @@ namespace GXPEngine.Classes
 
         public void generateLevel(int index)
         {
-            _filename = "Data/level" + index + ".tmx";            
+            _filename = "Data/Levels/level" + index + ".tmx";            
 
             //Background creation
             Bitmap Bmp = new Bitmap(800, 600);
@@ -74,7 +74,7 @@ namespace GXPEngine.Classes
                         int x = j % _columns;
                         int y = j / _columns;
 
-                        _tiles.Add(new Tile(_tilesArray[j], level.TileSets[tileset_number].Image.FileName, level.TileSets[tileset_number].Columns, level.TileSets[tileset_number].Rows));
+                        _tiles.Add(new Tile(_tilesArray[j], "Data" + level.TileSets[tileset_number].Image.FileName, level.TileSets[tileset_number].Columns, level.TileSets[tileset_number].Rows));
                         _tiles[_num_objects].currentFrame = _tilesArray[j] - level.TileSets[tileset_number].FirstGId;
                         _tiles[_num_objects].x = (x * 30) + level.Layers[i].offsetx;
                         _tiles[_num_objects].y = (y * 32) + level.Layers[i].offsety - level.TileSets[tileset_number].TileHeight;
@@ -85,7 +85,17 @@ namespace GXPEngine.Classes
                 }
             }
 
-            _player = new Player(100, 400);
+            {
+                bool flipped = false;
+                if (index == 2)
+                {
+                    flipped = true;
+                }
+                TiledObject _object = level.ObjectGroups[2].Objects[0];
+                
+                _player = new Player(_object.X, _object.Y, flipped);
+            }
+ 
             for (int i = 0; i < level.ObjectGroups[0].Objects.Length; i++)
             {
                 TiledObject _object = level.ObjectGroups[0].Objects[i];

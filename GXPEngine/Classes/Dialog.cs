@@ -22,10 +22,12 @@ namespace GXPEngine.Classes
             Graphics gfx = Graphics.FromImage(Bmp);
             SolidBrush brush = new SolidBrush(System.Drawing.ColorTranslator.FromHtml("#A57300"));
             gfx.FillRectangle(brush, 0, 0, 800, 100);
-            Sprite _background = new Sprite(Bmp);
-            _background.width = 800;
-            _background.height = 100;
-            _background.y = 8;
+            Sprite _background = new Sprite(Bmp)
+            {
+                width = 800,
+                height = 100,
+                y = 8
+            };
             AddChild(_background);
 
             _player = ((MyGame)game).GetPlayer();
@@ -33,7 +35,7 @@ namespace GXPEngine.Classes
 
             for (int i = 0; i < 8; i++)
             {
-                Sprite _concon = new Sprite("Data/concon.png");
+                Sprite _concon = new Sprite("Data/Sprites/concon.png");
                
                 
               
@@ -57,7 +59,7 @@ namespace GXPEngine.Classes
             AddChild(_easyDraw);
 
             PrivateFontCollection pfc = new PrivateFontCollection();
-            pfc.AddFontFile("Data/LCD Solid.ttf");
+            pfc.AddFontFile("Data/Font/LCD Solid.ttf");
             _font = new Font(new FontFamily(pfc.Families[0].Name), 15, FontStyle.Regular);
         }
 
@@ -68,7 +70,7 @@ namespace GXPEngine.Classes
 
             if (lootQuantity != 0)
             {
-                Sprite _item = new Sprite("Data/" + lootType + ".png");
+                Sprite _item = new Sprite("Data/Sprites/" + lootType + ".png");
 
                 if(lootType == "coin")
                 {

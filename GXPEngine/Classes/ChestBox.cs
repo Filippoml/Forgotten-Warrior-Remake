@@ -13,7 +13,7 @@ namespace GXPEngine.Classes
         private readonly int _lootQuantity;
         private readonly String _lootType;
 
-        public ChestBox (float x, float y): base ("Data/chest.png", 2, 1)
+        public ChestBox (float x, float y): base ("Data/Sprites/chest.png", 2, 1)
         {
             this.x = x;
             //32 is the height of the level tile 

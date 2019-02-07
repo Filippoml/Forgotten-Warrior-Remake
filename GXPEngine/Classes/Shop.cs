@@ -12,26 +12,25 @@ namespace GXPEngine.Classes
 {
     public class Shop : Sprite
     {
-        private Sprite _background, _shop_rect;
+        private Sprite _itemSelectedSprite, _actionSelectedSprite;
 
         private Items _items;
 
-        private int _indexItems, _indexMode;
+        private int _indexItems, _indexAction;
 
         private EasyDraw _easyDraw;
 
-        private Font _font;
+        private readonly Font _font;
 
         private Player _player;
 
         private HUD _hud;
 
-        public Shop(float x, float y) : base("Data/shop.png")
+        public Shop(float x, float y) : base("Data/HUD/shop.png")
         {
             SetScaleXY(2f);
             this.x = x;
             this.y = y;
-
 
             _player = ((MyGame)game).GetPlayer();
             _hud = ((MyGame)game).GetHud();
@@ -40,21 +39,23 @@ namespace GXPEngine.Classes
             Graphics gfx = Graphics.FromImage(Bmp);
             SolidBrush brush = new SolidBrush(Color.White);
             gfx.FillRectangle(brush, 0, 0, 100, 100);
-            _background = new Sprite(Bmp);
-            _background.width = 26;
-            _background.height = 26;
-            _background.x = 41;
-            _background.y = 131;
-            AddChild(_background);
+            _itemSelectedSprite = new Sprite(Bmp)
+            {
+                width = 26,
+                height = 26,
+                x = 41,
+                y = 131
+            };
+            AddChild(_itemSelectedSprite);
 
-            _shop_rect = new Sprite("Data/shop_rect.png");
-            _shop_rect.SetXY(164, 46);
-            AddChild(_shop_rect);
+            _actionSelectedSprite = new Sprite("Data/HUD/shop_rect.png");
+            _actionSelectedSprite.SetXY(164, 46);
+            AddChild(_actionSelectedSprite);
 
-
+            //Filling items
             for (int i = 0; i < 5; i++)
             {                
-                Sprite _itemSprite = new Sprite("Data/item" + i + ".png");
+                Sprite _itemSprite = new Sprite("Data/Sprites/item" + i + ".png");
                 if (i > 2)
                 {
                     _itemSprite.SetXY(41 + 1 + (i * 32), 133);
@@ -80,11 +81,10 @@ namespace GXPEngine.Classes
             AddChild(_easyDraw);
 
             PrivateFontCollection pfc = new PrivateFontCollection();
-            pfc.AddFontFile("Data/LCD Solid.ttf");
+            pfc.AddFontFile("Data/Font/LCD Solid.ttf");
             _font = new Font(new FontFamily(pfc.Families[0].Name), 10, FontStyle.Regular);
 
-     
-            _easyDraw.graphics.DrawString("WELCOME", _font, new SolidBrush(Color.White), new PointF(80, 200));
+            
         }
         void Update()   
         {
@@ -93,68 +93,60 @@ namespace GXPEngine.Classes
                 if (visible)
                 {
                     keyHandler();
-
                 }
             }
         }
 
         private void keyHandler()
         {
-
-
             if (Input.GetKeyDown(Key.A))
             {
-                if (_background.x > 41)
+                if (_itemSelectedSprite.x > 41)
                 {
-                    _background.x -= 32;
+                    _itemSelectedSprite.x -= 32;
                     _indexItems--;
 
-                    Clear();
+                    updateValues();
                 }
 
             }
             else if(Input.GetKeyDown(Key.D))
             {
-                if (_background.x < 169)
+                if (_itemSelectedSprite.x < 169)
                 {
-                    _background.x += 32;
+                    _itemSelectedSprite.x += 32;
                     _indexItems++;
 
-                    Clear();
+                    updateValues();
                 }
          
             }
             else if (Input.GetKeyDown(Key.W))
             {
                 
-                if (_shop_rect.y > 46)
+                if (_actionSelectedSprite.y > 46)
                 {
-                    _shop_rect.y -= 18;
-                    _indexMode--;
+                    _actionSelectedSprite.y -= 18;
+                    _indexAction--;
                 }
 
             }
             else if (Input.GetKeyDown(Key.S))
             {
-                if(_shop_rect.y < 82)
+                if(_actionSelectedSprite.y < 82)
                 {
-                    _shop_rect.y += 18;
-                    _indexMode++;
+                    _actionSelectedSprite.y += 18;
+                    _indexAction++;
                 }
             }
             else if (Input.GetKeyDown(Key.ENTER))
             {
-               
                 Item _item = _items.Item[_indexItems];
-                switch(_indexMode)
+                switch(_indexAction)
                 {
                     case 0:
                         if (_player.GetCoinsNumber() >= _item.Cost)
                         {
-
-
-                     
-
                             switch (_indexItems)
                             {
                                 case 0:
@@ -162,42 +154,43 @@ namespace GXPEngine.Classes
                                 case 2:
                                     _player.GetWeapon().SetWeapon(_indexItems + 1);
                                     _player.SetCoinsNumber(false, _item.Cost);
-                                    Clear();
+                                    updateValues();
                                     _easyDraw.graphics.DrawString("ITEM PURCHASED", _font, new SolidBrush(Color.White), new PointF(60, 200));
                                     break;
+
                                 case 3:
                                     if(_hud.GetHealthPotionsNumber() < 9)
                                     {
                                         _hud.SetHealthPotionsNumber(true);
                                         _player.SetCoinsNumber(false, _item.Cost);
-                                        Clear();
+                                        updateValues();
                                         _easyDraw.graphics.DrawString("ITEM PURCHASED", _font, new SolidBrush(Color.White), new PointF(60, 200));
                                     }
 
                                     break;
+
                                 case 4:
                                     if (_hud.GetManaPotionsNumber() < 9)
                                     {
                                         _hud.SetManaPotionsNumber(true);
                                         _player.SetCoinsNumber(false, _item.Cost);
-                                        Clear();
+                                        updateValues();
                                         _easyDraw.graphics.DrawString("ITEM PURCHASED", _font, new SolidBrush(Color.White), new PointF(60, 200));
-                                    }
-                                                               
+                                    }                                        
                                     break;
                             }
 
                         }
                         else
                         {
-                            Clear();
+                            updateValues();
                             _easyDraw.graphics.DrawString("NO ENOUGH MONEY", _font, new SolidBrush(Color.White), new PointF(55, 200));
                         }
                         break;
 
                     case 1:
 
-                        Clear();
+                        updateValues();
                         switch (_item.Type)
                         {
                             case "weapon":
@@ -214,32 +207,24 @@ namespace GXPEngine.Classes
                     case 2:
                         visible = false;
                         _player.SetState(Player.State.IDLE);
-                       
                         break;
                 }
-
             }
-
-
-
-            
         }
 
         public void Show()
         {
-            Clear();
+            updateValues();
+            _easyDraw.graphics.DrawString("WELCOME", _font, new SolidBrush(Color.White), new PointF(80, 200));
             visible = true;
         }
 
-        private void Clear()
+        private void updateValues()
         {
-
             Item _item = _items.Item[_indexItems];
             _easyDraw.Clear(Color.Transparent);
             _easyDraw.graphics.DrawString(_player.GetCoinsNumber().ToString(), _font, new SolidBrush(Color.White), new PointF(172, 172.5f));
             _easyDraw.graphics.DrawString(_item.Cost.ToString(), _font, new SolidBrush(Color.White), new PointF(65, 172.5f));
-
-            
         }
     }
 }

@@ -33,6 +33,8 @@ namespace GXPEngine.Classes
 
         private readonly List<Sprite> _spritesSpecialPower;
 
+        private State _currentState;
+
         public enum State
         {
             IDLE,
@@ -44,13 +46,12 @@ namespace GXPEngine.Classes
             HIDING
         }
 
-        private State _currentState;
-
-
-        public Player(float x, float y) : base("Data/player.png", 2, 8)
+        public Player(float x, float y, bool flipped) : base("Data/AnimationSprites/player.png", 2, 8)
         {
             this.x = x;
-            this.y = y;
+            //32 is the height of the level tile 
+            this.y = y - 32 - this.height;
+            _mirrorX = flipped;
 
             //Init
             SetScaleXY(1.2f);
@@ -58,7 +59,7 @@ namespace GXPEngine.Classes
 
             _coinsNumber = Data.Default.coins;
             _lifePoints = Data.Default.lifepoints;
-            _manaPoints = Data.Default.manapotions;
+            _manaPoints = Data.Default.manapoints;
 
             _frameRate = 12;
             _speed = 3;
@@ -68,11 +69,11 @@ namespace GXPEngine.Classes
             _currentWeapon.SetWeapon(Data.Default.weapon);
             AddChild(_currentWeapon);
 
-            _colliderBox = new Collider("Data/HitBox.png", this);
+            _colliderBox = new Collider("Data/Sprites/HitBox.png", this);
             _colliderBox.SetOrigin(-12, 0);
             AddChild(_colliderBox);
 
-            _hitSprite = new Sprite("Data/hit.png")
+            _hitSprite = new Sprite("Data/Sprites/hit.png")
             {
                 visible = false
             };
@@ -81,7 +82,7 @@ namespace GXPEngine.Classes
             AddChild(_hitSprite);
 
             //Visible when pressing 1 or 2
-            _circlePotionEffect = new Sprite("Data/red_circle.png")
+            _circlePotionEffect = new Sprite("Data/Sprites/red_circle.png")
             {
                 visible = false,
                 x = 2
@@ -89,7 +90,7 @@ namespace GXPEngine.Classes
             _circlePotionEffect.y = height - (_circlePotionEffect.height * 2);
             AddChild(_circlePotionEffect);
 
-            _ray = new Sprite("Data/ray.png")
+            _ray = new Sprite("Data/Sprites/ray.png")
             {
                 y = this.height,
                 x = this.height / 2,
@@ -112,7 +113,8 @@ namespace GXPEngine.Classes
 
         void Update()
         {
-            if (!((MyGame)game).IsPaused())
+            Console.WriteLine(_yClimb);
+            if (!((MyGame)game).IsPaused() && currentFrame != 15)
             {
                 _frameCounter++;
 
@@ -127,7 +129,7 @@ namespace GXPEngine.Classes
                 {
                     keyHandler();
                 }
-                Animate();
+                animate();
 
                 _grounding = false;
                 _canClimb = false;
@@ -195,7 +197,7 @@ namespace GXPEngine.Classes
                     }
 
                     //Check if player is colliding with ground tiles
-                    if (((_tile.GetId() >= 1 && _tile.GetId() <= 3) || (_tile.GetId() >= 7 && _tile.GetId() <= 9)) && _currentState != State.JUMPING && _currentState != State.CLIMBING)
+                    if (((_tile.GetId() >= 1 && _tile.GetId() <= 3) || (_tile.GetId() >= 7 && _tile.GetId() <= 9) || (_tile.GetId() >= 13 && _tile.GetId() <= 15)) && _currentState != State.JUMPING && _currentState != State.CLIMBING)
                     {
                         float old_y = y - (_tile.y - height + 12);
 
@@ -238,7 +240,7 @@ namespace GXPEngine.Classes
                     Data.Default.manapotions = _hud.GetManaPotionsNumber();
                     Data.Default.coins = _coinsNumber;
                     Data.Default.lifepoints = _lifePoints;
-                    Data.Default.manapotions = _manaPoints;
+                    Data.Default.manapoints = _manaPoints;
                     Data.Default.weapon = _currentWeapon.GetWeapon();
 
                     Sound _sound = new Sound("Data/Sounds/level_completed.wav", false, false);
@@ -279,10 +281,10 @@ namespace GXPEngine.Classes
             }
         }
 
-        private void Animate()
+        private void animate()
         {
-            //Check framerate and player alive
-            if (_frameCounter == (60 / _frameRate) && currentFrame != 15)
+            //Check framerate
+            if (_frameCounter == (60 / _frameRate))
             {
                 if(_currentWeapon.GetWeapon() == 0)
                 {
@@ -384,7 +386,7 @@ namespace GXPEngine.Classes
 
         private void keyHandler()
         {
-            if (Input.GetKey(Key.A) && _currentState != State.CLIMBING && !Input.GetKey(Key.D) && _currentState != State.HIDING && x > 0)
+            if ((Input.GetKey(Key.A) || Input.GetKey(Key.LEFT)) && _currentState != State.CLIMBING && !Input.GetKey(Key.D) && _currentState != State.HIDING && x > 0)
             {
                 Move(-_speed, 0);
 
@@ -399,7 +401,7 @@ namespace GXPEngine.Classes
                 }
             }
   
-            if (Input.GetKey(Key.D) && _currentState != State.CLIMBING && !Input.GetKey(Key.A) && _currentState != State.HIDING)
+            if ((Input.GetKey(Key.D) || Input.GetKey(Key.RIGHT)) && _currentState != State.CLIMBING && !Input.GetKey(Key.A) && _currentState != State.HIDING && x < 1600)
             {
                 Move(_speed, 0);
                 if (_mirrorX)
@@ -414,7 +416,7 @@ namespace GXPEngine.Classes
             }
             
 
-            if (Input.GetKey(Key.W) && _currentState != State.FALLING && _currentState != State.JUMPING)
+            if ((Input.GetKey(Key.W) || Input.GetKey(Key.UP)) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
                 if (_canClimb && _yClimb < _yClimbdone && _caPressWToClimb)
                 {
@@ -429,7 +431,7 @@ namespace GXPEngine.Classes
                     _currentState = State.IDLE;
                 }
 
-                if (_canHide)
+                if (_canHide && _currentState != State.HIDING)
                 {
                     this.x = _hideX + 2;
                     Mirror(false, false);
@@ -441,7 +443,7 @@ namespace GXPEngine.Classes
                 }
             }
 
-            if (Input.GetKey(Key.S) && _currentState != State.FALLING && _currentState != State.JUMPING)
+            if ((Input.GetKey(Key.S) || Input.GetKey(Key.DOWN)) && _currentState != State.FALLING && _currentState != State.JUMPING)
             {
                 if (_canClimb && _yClimb > 0)
                 {
@@ -539,7 +541,7 @@ namespace GXPEngine.Classes
                 _hud.UpdateLifeBar(_lifePoints);
                 _circlePotionEffect.y = height - (_circlePotionEffect.height * 2);
 
-                _circlePotionEffect.texture = new Texture2D("Data/red_circle.png");
+                _circlePotionEffect.texture = new Texture2D("Data/Sprites/red_circle.png");
                 _circlePotionEffect.visible = true;
             }
         }
@@ -560,7 +562,7 @@ namespace GXPEngine.Classes
                 _hud.UpdateManaBar(_manaPoints);
                 _circlePotionEffect.y = height - (_circlePotionEffect.height * 2);
 
-                _circlePotionEffect.texture = new Texture2D("Data/blue_circle.png");
+                _circlePotionEffect.texture = new Texture2D("Data/Sprites/blue_circle.png");
                 _circlePotionEffect.visible = true;
             }
         }
@@ -611,7 +613,7 @@ namespace GXPEngine.Classes
         {
             if (_time_passed == 0)
             {
-                Sprite _blueWave = new Sprite("Data/blue_wave.png");
+                Sprite _blueWave = new Sprite("Data/Sprites/blue_wave.png");
 
                 if (_mirrorX)
                 {
@@ -668,6 +670,11 @@ namespace GXPEngine.Classes
             {
                 _circlePotionEffect.visible = false;
             }
+        }
+
+        public int GetYClimb()
+        {
+            return _yClimb;
         }
     }
 }

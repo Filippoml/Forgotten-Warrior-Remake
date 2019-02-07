@@ -8,9 +8,10 @@ namespace GXPEngine.Classes
 {
     public class Coin : Sprite
     {
-        public Coin(float x, float y) : base("Data/coin.png")
+        public Coin(float x, float y) : base("Data/Sprites/coin.png")
         {
             this.x = x;
+            //32 is the height of the level tile 
             this.y = y - 32 - this.height;
         }
     }

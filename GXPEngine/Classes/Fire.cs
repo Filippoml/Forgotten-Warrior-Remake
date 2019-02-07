@@ -11,15 +11,14 @@ namespace GXPEngine.Classes
     {
         private bool _movingRight, _onGround, _canDamage;
 
-        private readonly int _screenSection;
+        private readonly int _screenSection, _frameRate;
+        private int _frameCounter;
 
-        private int _frameCounter, _frameRate;
-
-        private float _speed, _yVelocity;
-
+        private readonly float _speed;
+        private float _yVelocity;
         private Player _player;
 
-        public Fire(float x, float y) : base("Data/fire.png", 2 , 1)
+        public Fire(float x, float y) : base("Data/AnimationSprites/fire.png", 2 , 1)
         {
             this.x = x;
             //32 is the height of the level tile 
@@ -100,13 +99,13 @@ namespace GXPEngine.Classes
                     }
 
                     //Check if is colliding with border tiles
-                    if (_tile.GetId() == 1 || _tile.GetId() == 3)
+                    if (_tile.GetId() == 1 || _tile.GetId() == 3 || _tile.GetId() == 7 || _tile.GetId() == 9)
                     {
                         _movingRight = !_movingRight;
                     }
                 }
                 //Check collision with player
-                else if (collisions[i] == _player.getCollider() && _player.GetState() != Player.State.HIDING)
+                else if (collisions[i] == _player.getCollider() && _player.GetState() != Player.State.HIDING && (_player.GetYClimb() < 13 || _player.GetYClimb() > 95))
                 {    
                     if (_canDamage)
                     {
